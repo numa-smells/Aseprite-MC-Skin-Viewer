@@ -16,7 +16,6 @@ function init(plugin)
     title="MC Skin Viewer",
     group="view_screen",
     onclick=function()
-      plugin.preferences.count = plugin.preferences.count+1
       PluginPath = plugin.path
       dofile(plugin.path.."\\mcskin-viewer.lua")
     end,
