@@ -17,6 +17,8 @@ function init(plugin)
     group="view_screen",
     onclick=function()
       PluginPath = plugin.path
+      VERSION = plugin.version
+
       dofile(plugin.path.."\\mcskin-viewer.lua")
     end,
     onenabled=function()

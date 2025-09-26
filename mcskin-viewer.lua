@@ -1,7 +1,6 @@
 -- MC SKIN VIEWER BY NUMA FOR ASEPRITE
 -- DO NOT REUPLOAD THANKS
 
-local VERSION = "1.0"
 local FPS = 30
 
 -- This script requires UI
@@ -834,7 +833,7 @@ dlg:endtabs{
 
 }
 
-dlg:separator{id="ver", text="MC-Skin Viewer v".. VERSION .." by @numa_smells"}
+dlg:separator{id="ver", text="MC-Skin Viewer v".. tostring(VERSION) .." by @numa_smells"}
 
 dlg:show{wait=false}
 timer:start()
