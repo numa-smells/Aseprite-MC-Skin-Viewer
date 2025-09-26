@@ -1,0 +1,20 @@
+name: Releases
+
+on: 
+  push:
+    tags:
+    - '*'
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Create Release
+      uses: ncipollo/release-action@v1.20.0
+      with:
+        artifacts: "mcskin-viewer.aseprite-extension"
+        bodyFile: "body.md"
