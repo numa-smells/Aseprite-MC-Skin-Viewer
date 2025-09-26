@@ -17,4 +17,3 @@ jobs:
       uses: ncipollo/release-action@v1.20.0
       with:
         artifacts: "mcskin-viewer.aseprite-extension"
-        bodyFile: "body.md"
