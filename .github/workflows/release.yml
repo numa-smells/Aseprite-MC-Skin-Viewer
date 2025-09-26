@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@master
     - name: Archive Release
@@ -19,5 +21,4 @@ jobs:
       uses: ncipollo/release-action@v1.20.0
       with:
         artifacts: "mcskin-viewer.aseprite-extension"
-        token: ${{ secrets.GITHUB_TOKEN }}
     
