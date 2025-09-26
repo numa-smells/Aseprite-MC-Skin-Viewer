@@ -11,9 +11,3 @@ jobs:
         type: 'zip'
         filename: 'mcskin-viewer.aseprite-extension'
         exclusions: '*.git* /*node_modules/* .editorconfig LICENSE README.md'
-
-    - name: Upload Release
-      uses: ncipollo/release-action@v1.12.0
-      with:
-        artifacts: "mcskin-viewer.aseprite-extension"
-        token: ${{ secrets.GITHUB_TOKEN }}
