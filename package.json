@@ -1,0 +1,17 @@
+{
+  "name": "mcskin-viewer",
+  "displayName": "MC Skin Viewer",
+  "description": "Views MC Skins natively in Aseprite",
+  "version": "1.0",
+  "author": { "name": "numa_smells",
+              "url": "https://bsky.app/profile/numa-smells.bsky.social" },
+  "contributors": [ ],
+  "publisher": "numa_smells",
+  "license": "GNU GPLv3",
+  "categories": [ "Scripts" ],
+  "contributes": {
+    "scripts": [
+        { "path": "./my-script.lua" }
+    ]
+  }
+}
