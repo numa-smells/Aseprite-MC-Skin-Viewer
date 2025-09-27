@@ -54,7 +54,7 @@ The extension may ask permission to read `mirrormap.png` and `mirrormap_slim.png
 - `Export Preview:`: Renders and opens a preview image in the Aseprite folder. Convenient for sharing with others. 
 
 > [!NOTE]
-> Will ask for permission when ran for the first time.
+> The plugin will ask for permission when exporting for the first time.
 
 <br clear="right"/>
 
