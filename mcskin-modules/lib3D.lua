@@ -1,5 +1,5 @@
-dofile("./vec3.lua")
-dofile("./tex2.lua")
+dofile("vec3.lua")
+dofile("tex2.lua")
 
 
 local sin, cos  = math.sin, math.cos

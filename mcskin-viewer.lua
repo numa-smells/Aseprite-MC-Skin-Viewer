@@ -18,7 +18,7 @@ if not (app.sprite.width == 64 and app.sprite.height == 64) then
   return
 end
 
-dofile("./mcskin-modules/mcmodel.lua")
+dofile("mcskin-modules/mcmodel.lua")
 
 local model = MCModel.new()
 --print(model)

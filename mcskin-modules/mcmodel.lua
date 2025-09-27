@@ -1,9 +1,9 @@
-dofile("./lib3D.lua")
-dofile("./vec3.lua")
-dofile("./tex2.lua")
-dofile("./mat4x4.lua")
-dofile("./part.lua")
-dofile("./sort.lua")
+dofile("lib3D.lua")
+dofile("vec3.lua")
+dofile("tex2.lua")
+dofile("mat4x4.lua")
+dofile("part.lua")
+dofile("sort.lua")
 
 MCModel = {}
 MCModel.__index = MCModel

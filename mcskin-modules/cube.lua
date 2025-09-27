@@ -1,5 +1,5 @@
-dofile("./vec3.lua")
-dofile("./tex2.lua")
+dofile("vec3.lua")
+dofile("tex2.lua")
 
 
 Cube = {}

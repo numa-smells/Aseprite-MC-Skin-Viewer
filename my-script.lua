@@ -19,7 +19,7 @@ function init(plugin)
       PluginPath = plugin.path
       VERSION = plugin.version
 
-      dofile(plugin.path.."\\mcskin-viewer.lua")
+      dofile(plugin.path..app.fs.pathSeparator.."mcskin-viewer.lua")
     end,
     onenabled=function()
         if not app.sprite then

@@ -1,6 +1,6 @@
-dofile("./vec3.lua")
-dofile("./tex2.lua")
-dofile("./cube.lua")
+dofile("vec3.lua")
+dofile("tex2.lua")
+dofile("cube.lua")
 
 Part = {}
 Part.__index = Part
