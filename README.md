@@ -8,7 +8,7 @@ Aseprite's official instructions on installing extensions can be found here: htt
 
 1. [Dowload the .aseprite-extension file in the latest release.](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/releases/latest)
 
-2. Double-click the file to install.
+2. Double-click the file to install. OR
 
 3. In Aseprite, Go to `Edit > Preferences > Extensions` and click the `Add Extension` button.
 
@@ -37,7 +37,7 @@ The extension may ask permission to read `mirrormap.png` and `mirrormap_slim.png
 - `Align View:` Snap the camera to view the model the given options.
 
 ### Model
-- `Model Type:` Select wether the skin type read as Classic (4px arms), Slim (3px arms), or Auto.
+- `Model Type:` Select whether the skin type read as Classic (4px arms), Slim (3px arms), or Auto.
 
 - `Toggle Overlay Layers:` Toggle visibility on the skin's 2nd layer.
 
