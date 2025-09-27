@@ -255,11 +255,11 @@ function MCModel:draw(texture, camera, gc)
                 local normal = Vec3.norm(Vec3.cross(line1,line2))
 
                 if (not cube.isBackfaceCulling) or ( Vec3.dot(normal, pointBuffer[face[1]]) < 0) then
-                    local dp = -normal.z
+                    -- local dp = -normal.z
 
-                    if not cube.isBackfaceCulling then
-                        dp = math.abs(dp)
-                    end
+                    -- if not cube.isBackfaceCulling then
+                    --     dp = math.abs(dp)
+                    -- end
 
                     local projTri = triangle()
         
@@ -270,7 +270,7 @@ function MCModel:draw(texture, camera, gc)
                         
                     if clip(Vec3(0,0,0.1), Vec3(0,0,1), projTri) then
 
-                        projTri.c = (dp + 1)/2
+                        projTri.c = 1--(dp + 1)/2
 
                         projTri.t[1] = uv[1]
                         projTri.t[2] = uv[2]

@@ -2,7 +2,7 @@ name: Release
 on: 
   push:
     tags:
-    - '*'
+    - 'v*'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,7 +15,7 @@ jobs:
       with:
         type: 'zip'
         filename: 'mcskin-viewer.aseprite-extension'
-        exclusions: '*.git* /*node_modules/* .editorconfig LICENSE README.md'
+        exclusions: '*.git* /*node_modules/* .editorconfig LICENSE README.md /docs'
 
     - name: Create Release
       uses: ncipollo/release-action@v1.20.0
