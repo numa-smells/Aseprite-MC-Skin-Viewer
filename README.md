@@ -6,7 +6,7 @@ An [Aseprite](https://github.com/aseprite/aseprite/) plugin-extension to preview
 ## Installation
 Aseprite's official instructions on installing extensions can be found here: https://www.aseprite.org/docs/extensions/
 
-1. [Dowload the extension in the latest release.](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/releases/mcskin-viewer.aseprite-extension)
+1. [Dowload the extension in the latest release.](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/releases/latest/mcskin-viewer.aseprite-extension)
 
 2. Double-click the file to install.
 
