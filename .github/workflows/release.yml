@@ -22,3 +22,12 @@ jobs:
       with:
         artifacts: "mcskin-viewer.aseprite-extension"
     
+    - name: Itch.io - Publish
+      uses: KikimoraGames/itch-publish@v0.0.3
+      with:
+        butlerApiKey: ${{secrets.BUTLER_API_KEY}}
+        gameData: "mcskin-viewer.aseprite-extension"
+        itchUsername: numa-smells
+        itchGameId: aseprite-mc-skin-viewer
+        buildChannel: mod
+            
