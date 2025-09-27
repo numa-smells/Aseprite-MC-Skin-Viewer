@@ -49,6 +49,9 @@ The extension may ask permission to read `mirrormap.png` and `mirrormap_slim.png
 
 - `Flip:` If only `Copy From` is selected, it will flip that part's texture in place. If a `Paste To` is specified, then it will copy over a flip image to the part destination.
 
+> [!TIP]
+> In case of mistakes, you can undo the action with ctrl+z.
+
 ### Export
 
 - `Background Color`: Sets the background color in the preview image. This is gray by default.
