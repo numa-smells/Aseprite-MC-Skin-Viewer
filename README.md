@@ -1,8 +1,7 @@
 # Aseprite MC-Skin Viewer 
 ![GitHub License](https://img.shields.io/github/license/numa-smells/Aseprite-MC-Skin-Viewer)
 
-An aseprite plugin to view Minecraft Skins.
-
+An aseprite plugin-extension to preview Minecraft Skins. Reduces the need for using external programs and includes tools to make skin creation easier.
 
 ## Installation
 
