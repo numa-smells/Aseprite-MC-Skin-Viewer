@@ -53,8 +53,10 @@ The extension may ask permission to read `mirrormap.png` and `mirrormap_slim.png
 > In case of mistakes, you can undo the action with ctrl+z.
 
 ### Export
+- `Light Direction`: Sets the global light direction for the model. This is `Front` by default. It can also be set to `None` to disable lighting.
 
 - `Background Color`: Sets the background color in the preview image. This is gray by default.
+
 - `Export Preview:`: Renders and opens a preview image in the Aseprite folder. Convenient for sharing with others. 
 
 > [!NOTE]

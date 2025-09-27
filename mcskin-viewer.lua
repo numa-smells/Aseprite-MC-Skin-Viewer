@@ -243,7 +243,7 @@ function onpaint(ev)
   local gc = ev.context
 
   
-  model:draw(texture, camera, gc)
+  model:draw(texture, camera, gc,dlg.data["light_dir"])
   --gc:drawImage(last_cell, 0 ,0, 64, 64, 0, 0, 128, 128)
 end
 
@@ -773,6 +773,17 @@ dlg:tab{
   text="Export"
 }
 
+dlg:label{text="Light Direction"}
+
+dlg:combobox{
+  id = "light_dir",
+  option = "Front",
+  options = {"Front","Top","None"},
+  onchange = function()
+    repaint()
+  end
+}
+
 dlg:label{text="Background Color"}
 
 dlg:color{id = "bg_color", color=Color{gray=64, alpha=255}}
@@ -794,11 +805,11 @@ dlg:button{
     local export_camera = {pos = Vec3(0,0,2.5), rot=Vec3(0,0.5,-0.2)}
     local exportImage1 = Image(960,1080)
 
-    model:draw(texture, export_camera, exportImage1.context)
+    model:draw(texture, export_camera, exportImage1.context,dlg.data["light_dir"])
 
     export_camera = {pos = Vec3(0,0,2.5), rot=Vec3(0,math.pi+0.5,-0.2)}
     local exportImage2 = Image(960,1080)
-    model:draw(texture, export_camera, exportImage2.context)
+    model:draw(texture, export_camera, exportImage2.context,dlg.data["light_dir"])
 
     local finalImage = Image(1920,1080)
 
