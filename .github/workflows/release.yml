@@ -30,3 +30,4 @@ jobs:
         itchUsername: numa-smells
         itchGameId: aseprite-mc-skin-viewer
         buildChannel: mod
+        buildNumber: ${{ github.ref_name }}
