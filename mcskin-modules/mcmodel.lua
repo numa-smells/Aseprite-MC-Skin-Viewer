@@ -265,7 +265,7 @@ function MCModel:draw(texture, camera, gc,light_dir)
                     end
                     
 
-                    if not cube.isBackfaceCulling then
+                    if not cube.isBackfaceCulling and normal.z > 0 then
                         dp = math.abs(dp)
                     end
 
