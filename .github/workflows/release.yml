@@ -14,10 +14,25 @@ jobs:
       uses: TheDoctor0/zip-release@0.7.6
       with:
         type: 'zip'
-        filename: 'mcskin-viewer.aseprite-extension'
+        filename: ${{format('mcskin-viewer{0}.aseprite-extension',  github.ref_name )}}
         exclusions: '*.git* /*node_modules/* .editorconfig LICENSE README.md /*docs/*'
 
     - name: Create Release
       uses: ncipollo/release-action@v1.20.0
       with:
-        artifacts: "mcskin-viewer.aseprite-extension"
+        artifacts: ${{format('mcskin-viewer{0}.aseprite-extension',  github.ref_name )}}
+
+    - name: Itch.io - Publish
+      uses: KikimoraGames/itch-publish@v0.0.3
+      with:
+         # Butler API Key
+        butlerApiKey: ${{secrets.BUTLER_API_KEY}}
+        # Directory or .zip file of the game data. Zip files are slower to upload.
+        gameData: ${{format('mcskin-viewer{0}.aseprite-extension',  github.ref_name )}}
+        # Itch.io username of the game owner. e.g. in finji/overland this would be finji.
+        itchUsername: numa-smells
+        # Itch.io id of the game. e.g. in finji/overland this would be overland.
+        itchGameId: aseprite-mc-skin-viewer
+        # Channel name of the game: https://itch.io/docs/butler/pushing.html#channel-names
+        buildChannel: mod
+        # Optional build number, use to supply your own build version instead of using itch's versioning
