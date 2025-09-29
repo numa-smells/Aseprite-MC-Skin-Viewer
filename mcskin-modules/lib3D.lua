@@ -227,13 +227,14 @@ function drawQuad(gc, tri)
   gc:lineTo(bx, by)
   gc:lineTo(dx, dy)
   gc:lineTo(cx, cy)
-  
-  
-  gc.antialias = false
-  gc:fill()
+  gc:closePath()
   
   if tri.c.alpha == 255 then
     gc.antialias = true
+    gc:fill()
     gc:stroke()
+  else
+    gc.antialias = false
+    gc:fill()
   end
 end

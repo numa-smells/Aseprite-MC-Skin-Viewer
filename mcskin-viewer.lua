@@ -259,6 +259,7 @@ function onmousemove(ev)
   if ev.button == MouseButton.LEFT then
     camera.rot.y = camera.rot.y + delta.x/40
     camera.rot.z = camera.rot.z - delta.y/40
+    dlg:modify{id = 'canvas', mouseCursor = MouseCursor.GRABBING}
     repaint()
   elseif ev.button == MouseButton.RIGHT then
     local d = dlg.bounds
@@ -269,9 +270,13 @@ function onmousemove(ev)
 
     camera.pos.x = camera.pos.x + delta.x * zoom_offset
     camera.pos.y = camera.pos.y + delta.y * zoom_offset
-
+    dlg:modify{id = 'canvas', mouseCursor = MouseCursor.MOVE}
     repaint()
+  else
+    dlg:modify{id = 'canvas', mouseCursor = MouseCursor.ARROW}
   end
+
+  
 end
 
 function onwheel(ev)
@@ -280,6 +285,7 @@ function onwheel(ev)
 end
 
 dlg:canvas{
+  id = 'canvas',
   autoscaling=true, 
   width = 320,
   height = 320,
