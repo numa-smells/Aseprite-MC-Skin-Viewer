@@ -54,9 +54,27 @@ _No changes._
 ### Changed
 - Itch build will now correctly show the version.
 
-## [v1.0.7] - nd
+## [v1.1.0] - 2025-10-02
 ### Changed
-- Quads will be drawn anti-alliased if at 100% opacity.
+- Faces will be drawn anti-alliased if at 100% opacity.
 - Mouse cursor will now change when dragging or rotating the model.
+- Default lighting is now top facing.
+- `pose_reset()` will now also reset cube visibility.
+- Viewer now displays with a border similar to Aseprite's default preview window. 
+
 ### Added
 - [Created changelog](https://common-changelog.org).
+- New "First Person Pose".
+- Button to toggle tool visibility.
+- Check to dissalow duplicate dialogs on the same sprite.
+
+### Removed
+- Removed Herobrine
+
+### Fix
+- Check API Version to ensure compatability. ([#1](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/1))
+- Maybe fixed? Double checked file location calls. ([#2](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/2))
+
+### Known Issues
+- Pasting while mirror draw is on is broken.
+- Model continues to rotate after resizing dialog.

@@ -194,7 +194,10 @@ end
 function MCModel:reset_pose()
     for key, part in pairs(self) do
         if type(part) == "table" then
-        part:reset()
+            part:reset()
+            for name, cube in pairs(part.mesh) do
+                cube.isVisible = true
+            end
         end
     end
 end

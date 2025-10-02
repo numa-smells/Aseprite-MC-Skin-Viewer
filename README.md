@@ -24,7 +24,7 @@ The extension may ask permission to read `mirrormap.png` and `mirrormap_slim.png
 
 ## Features
 
-<img src="docs/1.png" alt="Screenshot of the preview window" align="right">
+<img src="docs/img/1.png" alt="Screenshot of the preview window" align="right">
 
 ### Preview
 - `RMB + Drag:` Rotate the model.
@@ -64,7 +64,7 @@ The extension may ask permission to read `mirrormap.png` and `mirrormap_slim.png
 
 <br clear="right"/>
 
-<img src="docs/2.png" alt = "">
+<img src="docs/img/2.png" alt = "">
 
 ## Contributing
 1. Fork the repository.

@@ -1,11 +1,14 @@
 -- MC SKIN VIEWER BY NUMA FOR ASEPRITE
 -- DO NOT REUPLOAD THANKS
 
-local FPS = 30
-
 -- This script requires UI
 if not app.isUIAvailable then
   return
+end
+
+--version requirement
+if app.apiVersion < 35 then
+  app.alert("Warning: This extention is designed to work on Aseprite v1.3.15 or newer. Some functions may not be available nor work as expected.")
 end
 
 if not app.sprite then
@@ -18,7 +21,21 @@ if not (app.sprite.width == 64 and app.sprite.height == 64) then
   return
 end
 
-dofile("mcskin-modules/mcmodel.lua")
+--keep track of all windows
+if(mcSkinViewers == nil) then
+  mcSkinViewers = {}
+end
+
+--check if this already exists
+for _,sprite in pairs(mcSkinViewers) do
+  if sprite == app.sprite then
+    return
+  end
+end
+
+local FPS = 30
+
+dofile("mcskin-modules"..app.fs.pathSeparator.."mcmodel.lua")
 
 local model = MCModel.new()
 --print(model)
@@ -131,6 +148,51 @@ local timer = Timer{
       model["arm_l_slim"].pos.x = 9/8
       model["arm_r"].pos.x = -9/8
       model["arm_l"].pos.x = 9/8
+    elseif pose == "1st Person"  then
+      camera.pos = Vec3(0,0,1.5)
+      camera.rot = Vec3(0,3.14,0)
+      --camera.pos.z = 0
+      -- model["arm_r"].pos = camera.pos:copy()
+      -- model["arm_r"].pos.z = math.exp(model["arm_r"].pos.z)
+      -- model["arm_r"].pos = Vec3.mult(model["arm_r"].pos, -1)
+      
+      -- model["arm_r"].pos = model["arm_r"].pos + Vec3(0,0,2)
+
+      model["arm_r_slim"].pos.x = -9/8
+      model["arm_l_slim"].pos.x = 9/8
+      model["arm_r"].pos.x = -9/8
+      model["arm_l"].pos.x = 9/8
+
+      model["arm_r"].rot.z = 3.14*3/4
+      model["arm_l"].rot.z = 3.14*3/4
+
+      model["arm_r"].rot.y = 3.14*1/4
+      model["arm_r_slim"].rot.y = 3.14*1/4
+
+      model["arm_l"].rot.y = -3.14*1/4
+      model["arm_l_slim"].rot.y = -3.14*1/4
+
+      model["arm_r"].pos.y = 1.8
+      model["arm_r_slim"].pos.y = 1.8
+
+      model["arm_l"].pos.y = 1.8
+      model["arm_l_slim"].pos.y = 1.8
+
+
+      model["arm_r_slim"].rot.z = 3.14*3/4
+      model["arm_l_slim"].rot.z = 3.14*3/4
+
+      model:cube_visibility("head", false)
+      model:cube_visibility("hat", false)
+
+      model:cube_visibility("body", false)
+      model:cube_visibility("jacket", false)
+
+      model:cube_visibility("leg_l", false)
+      model:cube_visibility("pants_l", false)
+
+      model:cube_visibility("leg_r", false)
+      model:cube_visibility("pants_r", false)
     end
 
     repaint_force()
@@ -139,6 +201,7 @@ local timer = Timer{
 
 dlg = Dialog{
   title=getLocalFilename(sprite),
+  autofit = Align.BOTTOM,
   onclose = function(ev)
     app.events:off(texture_changed)
     sprite.events:off(texture_changed)
@@ -147,8 +210,18 @@ dlg = Dialog{
     sprite.events:off(texture_changed)
     sprite.events:off(on_filenamechange)
     timer:stop()
+
+    
+    for i=1, #mcSkinViewers do
+      if mcSkinViewers[i] == sprite then
+        table.remove(mcSkinViewers,i)
+        return
+      end
+    end
   end
 }
+
+table.insert(mcSkinViewers, sprite)
 
 repaint_force = function()
   dlg:repaint()
@@ -242,8 +315,10 @@ sprite.events:on('filenamechange', on_filenamechange)
 function onpaint(ev)
   local gc = ev.context
 
-  
+  gc.color = gc.theme.color.editor_face
+  gc:fillRect(Rectangle(0,0,gc.width,gc.height))
   model:draw(texture, camera, gc,dlg.data["light_dir"])
+  gc:drawThemeRect("editor_selected", 0,0,gc.width, gc.height)
   --gc:drawImage(last_cell, 0 ,0, 64, 64, 0, 0, 128, 128)
 end
 
@@ -280,7 +355,7 @@ function onmousemove(ev)
 end
 
 function onwheel(ev)
-  camera.pos.z = math.max(camera.pos.z + 0.1 * ev.deltaY,0)
+  camera.pos.z = math.max(camera.pos.z + 0.1 * ev.deltaY,-4)
   repaint()
 end
 
@@ -306,7 +381,7 @@ dlg:label{text="Pose"}
 dlg:combobox{
   id="pose",
   option="Stand",
-  options={"Stand", "Walk", "Sneak", "Sit", "Explode"},
+  options={"Stand", "Walk", "Sneak", "Sit", "Explode", "1st Person"},
   onchange = function()
     timer:start()
     model:reset_pose()
@@ -783,7 +858,7 @@ dlg:label{text="Light Direction"}
 
 dlg:combobox{
   id = "light_dir",
-  option = "Front",
+  option = "Top",
   options = {"Front","Top","None"},
   onchange = function()
     repaint()
@@ -792,7 +867,7 @@ dlg:combobox{
 
 dlg:label{text="Background Color"}
 
-dlg:color{id = "bg_color", color=Color{gray=64, alpha=255}}
+dlg:color{id = "bg_color", color=Color{gray=128, alpha=255}}
 dlg:button{
   id="export_preview",
   text = "Export Preview",
@@ -843,11 +918,27 @@ dlg:button{
   end
 }
 
-
-
 dlg:endtabs{
+  id='end_tab',
   align = Align.LEFT
 
+}
+
+local tools_visible = true
+dlg:button{
+  id="hide",
+  text="▲",
+  onclick = function()
+    tools_visible = not tools_visible
+    dlg:modify{id="end_tab", visible = tools_visible}
+    
+    if tools_visible then
+      dlg:modify{id="hide", text = "▼"}
+    else
+      dlg:modify{id="hide", text = "▲"}
+    end
+    
+  end
 }
 
 dlg:separator{id="ver", text="MC-Skin Viewer v".. tostring(VERSION) .." by @numa_smells"}
