@@ -56,23 +56,23 @@ _No changes._
 
 ## [v1.1.0] - 2025-10-02
 ### Changed
-- Faces will be drawn anti-alliased if at 100% opacity.
+- Faces will be drawn anti-aliased if at 100% opacity. 
 - Mouse cursor will now change when dragging or rotating the model.
 - Default lighting is now top facing.
-- `pose_reset()` will now also reset cube visibility.
 - Viewer now displays with a border similar to Aseprite's default preview window. 
+- `pose_reset()` will now also reset cube visibility.
 
 ### Added
 - [Created changelog](https://common-changelog.org).
 - New "First Person Pose".
 - Button to toggle tool visibility.
-- Check to dissalow duplicate dialogs on the same sprite.
+- Check to disallow duplicate dialogs on the same sprite.
 
 ### Removed
 - Removed Herobrine
 
 ### Fix
-- Check API Version to ensure compatability. ([#1](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/1))
+- Check API Version to ensure compatibility. ([#1](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/1))
 - Maybe fixed? Double checked file location calls. ([#2](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/2))
 
 ### Known Issues
