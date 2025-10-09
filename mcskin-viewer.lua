@@ -238,7 +238,9 @@ on_filenamechange = function(ev)
 end
 
 local curr_cell = Image(64, 64)
-curr_cell:drawImage(app.cel.image, app.cel.position)
+if app.cel then
+	curr_cell:drawImage(app.cel.image, app.cel.position)
+end
 local last_cell = curr_cell:clone()
 
 local curr_frame = app.frame.frameNumber
