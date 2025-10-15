@@ -92,4 +92,4 @@ _No changes._
 ### Known Issues
 - Pasting while mirror draw is on is broken.
 - Model continues to rotate after resizing dialog in multiple window mode. ([Issue on Aseprite's side, waiting for fix](https://github.com/aseprite/aseprite/issues/5449))
-- Visual issues due to wrong polygon ordering ([#5]).
+- Visual issues due to wrong polygon ordering. ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
