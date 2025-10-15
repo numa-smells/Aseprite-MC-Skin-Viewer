@@ -87,6 +87,9 @@ function splitQuad(buffer,tri,texture, gc, backside_showing)
   local wd = (math.abs(math.max(au,bu,cu,du) - math.min(au,bu,cu,du)) // 1)
   local hd = (math.abs(math.max(av,bv,cv,dv) - math.min(av,bv,cv,dv)) // 1)
 
+  --group_average
+  --local z_ave_group = az + bz + cz + dz
+
   for i=0, wd-1 do
     for j=0, hd-1 do
       --i actually dont need to draw some of these

@@ -991,7 +991,7 @@ dlg:button{
   end
 }
 
-dlg:separator{id="ver", text="MC-Skin Viewer v".. tostring(VERSION) .." by @numa_smells"}
+dlg:separator{id="ver", text="MC-Skin Viewer v".. tostring(VERSION) .." by @numa-smells"}
 
 dlg:show{wait=false}
 timer:start()
