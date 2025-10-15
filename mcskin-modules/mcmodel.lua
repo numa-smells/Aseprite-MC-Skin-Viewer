@@ -203,9 +203,8 @@ function MCModel:reset_pose()
 end
 
 
-function MCModel:draw(texture, camera, gc,light_dir)
+function MCModel:draw(texture, camera, gc,light_dir, AA)
 
-    --drawModel(gc, texture, camera)
     gc.strokeWidth = 1
     --initialize rotmatrices
     local matProj = Mat4x4.proj(30, gc.height / gc.width, 0.1, 1000)
@@ -267,8 +266,8 @@ function MCModel:draw(texture, camera, gc,light_dir)
                         dp = -normal.y
                     end
                     
-
-                    if not cube.isBackfaceCulling and normal.z > 0 then
+                    local backside_showing = not cube.isBackfaceCulling and normal.z > 0
+                    if backside_showing then
                         dp = math.abs(dp)
                     end
 
@@ -294,7 +293,7 @@ function MCModel:draw(texture, camera, gc,light_dir)
                         projTri.p[4] = proj_pointBuffer[face[4]]
 
 
-                        splitQuad(faceBuffer,projTri, texture,gc)
+                        splitQuad(faceBuffer,projTri, texture,gc, backside_showing)
                     end
                 end
             end
@@ -309,7 +308,7 @@ function MCModel:draw(texture, camera, gc,light_dir)
 
     for i = 1, #faceBuffer do
         local x = faceBuffer[i]
-        drawQuad(gc, x) 
+        drawQuad(gc, x, AA) 
     end
 
     --DEBUG DRAW PIVOTS

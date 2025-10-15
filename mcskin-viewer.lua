@@ -33,14 +33,15 @@ for _,sprite in pairs(mcSkinViewers) do
   end
 end
 
-local FPS = 30
+local TARGET_FPS = 30
 
 dofile("mcskin-modules"..app.fs.pathSeparator.."mcmodel.lua")
 
 local model = MCModel.new()
 --print(model)
 
-local texture = Image(64,64)
+local showDebug = false
+local AA = true
 
 local camera = {
   pos = Vec3(0,0,2.3),
@@ -48,6 +49,8 @@ local camera = {
 }
 
 local sprite = app.sprite
+local texture = Image(64,64,sprite.colorMode)
+
 texture:drawSprite(sprite, app.frame.frameNumber)
 
 model:auto_model(texture)
@@ -75,9 +78,9 @@ local on_filenamechange = function() end
 
 local fElapsedTime = 0.0
 local timer = Timer{
-  interval=1.0/FPS,
+  interval=1.0/TARGET_FPS,
   ontick=function()
-    fElapsedTime = fElapsedTime + 3 * 1.0/FPS
+    fElapsedTime = fElapsedTime + 3 * 1.0/TARGET_FPS
 
     local pose = dlg.data["pose"]
 
@@ -245,6 +248,7 @@ local last_cell = curr_cell:clone()
 
 local curr_frame = app.frame.frameNumber
 local curr_layer = app.layer.stackIndex
+local curr_mode = app.image.colorMode
 
 texture_changed = function(ev)
   if app.sprite == sprite and app.cel then
@@ -257,16 +261,18 @@ texture_changed = function(ev)
       local last_layer = curr_layer
       curr_layer = app.layer.stackIndex
 
-    
+      local last_mode = curr_mode
+      curr_mode = app.image.colorMode
 
+    
       if dlg.data["toggle_mirror"] then  
 
         --if were mirroring
         last_cell = curr_cell:clone()
-        curr_cell = Image(64, 64)
+        curr_cell = Image(64, 64, app.cel.image.colorMode)
         curr_cell:drawImage(app.cel.image, app.cel.position)
           
-        if last_frame ~= curr_frame or curr_layer ~= last_layer then
+        if last_frame ~= curr_frame or curr_layer ~= last_layer or last_mode ~= curr_mode then
           last_cell = curr_cell:clone()
         end
 
@@ -278,15 +284,15 @@ texture_changed = function(ev)
               local a = Color(last_cell:getPixel(x,y))
               local b = Color(curr_cell:getPixel(x,y))
 
-              if a.red ~= b.red or a.blue ~= b.blue or a.green ~= b.green or a.alpha ~= b.alpha then
+              if a.rgbaPixel ~= b.rgbaPixel  then
                 local c
                 if model.isSlim then
-                  c = Color(mirror_map_slim:getPixel(x,y))
+                  c = mirror_map_slim:getPixel(x,y)
                 else
-                  c = Color(mirror_map:getPixel(x,y))
+                  c = mirror_map:getPixel(x,y)
                 end
 
-                curr_cell:drawPixel(c.red/4,c.green/4,b)
+                curr_cell:drawPixel(app.pixelColor.rgbaR(c)/4,app.pixelColor.rgbaG(c)/4,b)
               end
             end
           end
@@ -296,7 +302,9 @@ texture_changed = function(ev)
         end
       end
       app.refresh() 
-      texture:drawSprite(sprite, app.frame.frameNumber, Point(0,0))
+      
+      texture = Image(64,64,sprite.colorMode) --this is why it breaks btw
+      texture:drawSprite(sprite, app.frame.frameNumber)
 
       if dlg.data["model_type"] == "Auto" then
         model:auto_model(texture)
@@ -314,14 +322,35 @@ sprite.events:on('layervisibility', texture_changed)
 app.events:on('sitechange', texture_changed)
 sprite.events:on('filenamechange', on_filenamechange)
 
+local fps_timer = Timer{}
+local slow_rate = 0
+
 function onpaint(ev)
+
+  local startTime = os.clock()
+
   local gc = ev.context
 
   gc.color = gc.theme.color.editor_face
   gc:fillRect(Rectangle(0,0,gc.width,gc.height))
-  model:draw(texture, camera, gc,dlg.data["light_dir"])
+  model:draw(texture, camera, gc,dlg.data["light_dir"],AA)
   gc:drawThemeRect("editor_selected", 0,0,gc.width, gc.height)
-  --gc:drawImage(last_cell, 0 ,0, 64, 64, 0, 0, 128, 128)
+  
+  local endTime = os.clock()
+  local executionTime = endTime - startTime
+  
+  if (1/executionTime) < TARGET_FPS then
+    slow_rate = slow_rate + 1
+  end
+
+  gc.color = gc.theme.color.text
+
+  if showDebug then
+    gc:fillText("FPS: "..string.sub(tostring(1/executionTime), 1,5), 8, 8)
+    gc:fillText("Drops: "..string.sub(tostring(slow_rate), 1,5), 8, 24)
+    -- gc:drawImage(last_cell, 0 ,0, 64, 64, 0, 64, 128, 128)
+    -- gc:drawImage(texture, 0 ,0, 64, 64, , 64, 128, 128)
+  end
 end
 
 local mouse = Point(0, 0)
@@ -744,7 +773,7 @@ dlg:button{
         local cube_from = model:get_cube(title_to_camel(dlg.data["copy_from"]))
         local cube_to = model:get_cube(title_to_camel(dlg.data["paste_to"]))
         
-        curr_cell = Image(64, 64)
+        curr_cell = Image(64, 64, app.cel.image.colorMode)
         curr_cell:drawImage(app.cel.image, app.cel.position)
         
         for i=1, 6 do
@@ -804,7 +833,7 @@ dlg:button{
           has_target = false
         end
 
-        curr_cell = Image(64, 64)
+        curr_cell = Image(64, 64, app.cel.image.colorMode)
         curr_cell:drawImage(app.cel.image, app.cel.position)
 
         local cell_copy = Image(curr_cell)
@@ -888,11 +917,11 @@ dlg:button{
     local export_camera = {pos = Vec3(0,0,2.5), rot=Vec3(0,0.5,-0.2)}
     local exportImage1 = Image(960,1080)
 
-    model:draw(texture, export_camera, exportImage1.context,dlg.data["light_dir"])
+    model:draw(texture, export_camera, exportImage1.context,dlg.data["light_dir"],true)
 
     export_camera = {pos = Vec3(0,0,2.5), rot=Vec3(0,math.pi+0.5,-0.2)}
     local exportImage2 = Image(960,1080)
-    model:draw(texture, export_camera, exportImage2.context,dlg.data["light_dir"])
+    model:draw(texture, export_camera, exportImage2.context,dlg.data["light_dir"],true)
 
     local finalImage = Image(1920,1080)
 
@@ -920,6 +949,25 @@ dlg:button{
   end
 }
 
+dlg:check{
+  id="toggle_fps",
+  text="Show FPS",
+  selected=false,
+  onclick = function()
+    showDebug = not showDebug
+  end
+}
+
+
+dlg:check{
+  id="toggle_AA",
+  text="Anti-Aliassing",
+  selected=AA,
+  onclick = function()
+    AA = not AA
+  end
+}
+
 dlg:endtabs{
   id='end_tab',
   align = Align.LEFT
@@ -929,7 +977,7 @@ dlg:endtabs{
 local tools_visible = true
 dlg:button{
   id="hide",
-  text="▲",
+  text="▼",
   onclick = function()
     tools_visible = not tools_visible
     dlg:modify{id="end_tab", visible = tools_visible}

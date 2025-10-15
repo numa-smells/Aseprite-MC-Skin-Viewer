@@ -75,6 +75,20 @@ _No changes._
 - Check API Version to ensure compatibility. ([#1](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/1))
 - Maybe fixed? Double checked file location calls. ([#2](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/2))
 
+
+## [v1.1.1] - n.d.
+### Changed
+- require API version 35 (v1.3.15 or newer)
+- Quads outside the canvas are culled for performance.
+### Added
+- FPS Toggle for debugging purposes.
+- Anti-Alliassing toggle.
+### Removed
+- Removed Herobrine.
+### Fix
+- Greyscale and Indexed color modes are now supported. ([#2](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/2),[#7](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/7))
+- Crash upon opening with an empty frame. ([#5](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/5))
+
 ### Known Issues
 - Pasting while mirror draw is on is broken.
-- Model continues to rotate after resizing dialog.
+- Model continues to rotate after resizing dialog in multiple window mode. ([Issue on Aseprite's side, waiting for fix](https://github.com/aseprite/aseprite/issues/5449))
