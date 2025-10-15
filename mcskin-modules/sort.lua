@@ -153,23 +153,9 @@ function sort.stable_sort(array, less)
 	return array
 end
 
-function sort.insertion_sort(array, less)
-	--setup
-	local trivial, n
-	trivial, n, less = sort._sort_setup(array, less)
-	if not trivial then
-		sort._insertion_sort_impl(array, 1, n, less)
-	end
-	return array
-end
-
-sort.unstable_sort = table.sort
-
 --export sort core to the global table module
 function sort:export()
-	table.insertion_sort = sort.insertion_sort
 	table.stable_sort = sort.stable_sort
-	table.unstable_sort = sort.unstable_sort
 end
 
 sort:export()
