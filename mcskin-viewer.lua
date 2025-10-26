@@ -241,14 +241,15 @@ on_filenamechange = function(ev)
 end
 
 local curr_cell = Image(64, 64)
+local curr_mode
 if app.cel then
 	curr_cell:drawImage(app.cel.image, app.cel.position)
+	curr_mode = app.image.colorMode
 end
 local last_cell = curr_cell:clone()
 
 local curr_frame = app.frame.frameNumber
 local curr_layer = app.layer.stackIndex
-local curr_mode = app.image.colorMode
 
 texture_changed = function(ev)
   if app.sprite == sprite and app.cel then
