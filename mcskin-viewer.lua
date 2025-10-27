@@ -49,7 +49,6 @@ local camera = {
 }
 
 local curr_sprite = app.sprite
---local sprite = app.sprite
 local texture = Image(64, 64, curr_sprite.colorMode)
 
 texture:drawSprite(curr_sprite, app.frame.frameNumber)
@@ -251,6 +250,8 @@ local last_cell = curr_cell:clone()
 
 local curr_frame = app.frame.frameNumber
 local curr_layer = app.layer.stackIndex
+
+
 
 texture_changed = function(ev)
   if app.sprite == curr_sprite then
@@ -542,15 +543,11 @@ dlg:combobox{
       model:classic_model()
       repaint()
       return
-    end
-
-    if result == "Slim" then
+    elseif result == "Slim" then
       model:slim_model()
       repaint()
       return
-    end
-
-    if result == "Auto" then
+    elseif result == "Auto" then
       model:auto_model(texture)
       repaint()
       return
