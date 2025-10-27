@@ -27,7 +27,7 @@ if(mcSkinViewers == nil) then
 end
 
 --check if this already exists
-for _,sprite in pairs(mcSkinViewers) do
+for _, sprite in pairs(mcSkinViewers) do
   if sprite == app.sprite then
     return
   end
@@ -48,10 +48,11 @@ local camera = {
   rot = Vec3()
 }
 
-local sprite = app.sprite
-local texture = Image(64,64,sprite.colorMode)
+local curr_sprite = app.sprite
+--local sprite = app.sprite
+local texture = Image(64, 64, curr_sprite.colorMode)
 
-texture:drawSprite(sprite, app.frame.frameNumber)
+texture:drawSprite(curr_sprite, app.frame.frameNumber)
 
 model:auto_model(texture)
 
@@ -203,20 +204,20 @@ local timer = Timer{
 
 
 dlg = Dialog{
-  title=getLocalFilename(sprite),
+  title=getLocalFilename(curr_sprite),
   autofit = Align.BOTTOM,
   onclose = function(ev)
     app.events:off(texture_changed)
-    sprite.events:off(texture_changed)
-    sprite.events:off(texture_changed)
-    sprite.events:off(texture_changed)
-    sprite.events:off(texture_changed)
-    sprite.events:off(on_filenamechange)
+    curr_sprite.events:off(texture_changed)
+    curr_sprite.events:off(texture_changed)
+    curr_sprite.events:off(texture_changed)
+    curr_sprite.events:off(texture_changed)
+    curr_sprite.events:off(on_filenamechange)
     timer:stop()
 
     
     for i=1, #mcSkinViewers do
-      if mcSkinViewers[i] == sprite then
+      if mcSkinViewers[i] == curr_sprite then
         table.remove(mcSkinViewers,i)
         return
       end
@@ -224,7 +225,7 @@ dlg = Dialog{
   end
 }
 
-table.insert(mcSkinViewers, sprite)
+table.insert(mcSkinViewers, curr_sprite)
 
 repaint_force = function()
   dlg:repaint()
@@ -237,7 +238,7 @@ repaint = function()
 end
 
 on_filenamechange = function(ev)
- dlg:modify{title = getLocalFilename(sprite)} 
+ dlg:modify{title = getLocalFilename(curr_sprite)} 
 end
 
 local curr_cell = Image(64, 64)
@@ -252,21 +253,21 @@ local curr_frame = app.frame.frameNumber
 local curr_layer = app.layer.stackIndex
 
 texture_changed = function(ev)
-  if app.sprite == sprite and app.cel then
+  if app.sprite == curr_sprite then
     if app.sprite.width == 64 and app.sprite.height == 64 then
       
       --make sure we are still on the same cell
       local last_frame = curr_frame
-      curr_frame = app.frame.frameNumber
+      curr_frame = app.frame.frameNumber -- update current frame
 
       local last_layer = curr_layer
-      curr_layer = app.layer.stackIndex
+      curr_layer = app.layer.stackIndex -- update current layer
 
       local last_mode = curr_mode
-      curr_mode = app.image.colorMode
+      curr_mode = app.sprite.colorMode -- update color mode
 
     
-      if dlg.data["toggle_mirror"] then  
+      if dlg.data["toggle_mirror"] and app.cel then  
 
         --if were mirroring
         last_cell = curr_cell:clone()
@@ -304,8 +305,8 @@ texture_changed = function(ev)
       end
       app.refresh() 
       
-      texture = Image(64,64,sprite.colorMode) --this is why it breaks btw
-      texture:drawSprite(sprite, app.frame.frameNumber)
+      texture = Image(64, 64, curr_sprite.colorMode) --this is why it breaks btw
+      texture:drawSprite(curr_sprite, app.frame.frameNumber)
 
       if dlg.data["model_type"] == "Auto" then
         model:auto_model(texture)
@@ -316,12 +317,12 @@ texture_changed = function(ev)
   repaint()
 end
 
-sprite.events:on('change', texture_changed)
-sprite.events:on('layerblendmode', texture_changed)
-sprite.events:on('layeropacity', texture_changed)
-sprite.events:on('layervisibility', texture_changed)
+curr_sprite.events:on('change', texture_changed)
+curr_sprite.events:on('layerblendmode', texture_changed)
+curr_sprite.events:on('layeropacity', texture_changed)
+curr_sprite.events:on('layervisibility', texture_changed)
 app.events:on('sitechange', texture_changed)
-sprite.events:on('filenamechange', on_filenamechange)
+curr_sprite.events:on('filenamechange', on_filenamechange)
 
 local fps_timer = Timer{}
 local slow_rate = 0
@@ -692,7 +693,7 @@ dlg:check{
   text="Mirror Draw",
   selected=false,
   onclick = function()
-    if app.sprite == sprite and app.cel then
+    if app.sprite == curr_sprite and app.cel then
       if app.sprite.width == 64 and app.sprite.height == 64 then
 
         last_cell = curr_cell:clone()
