@@ -541,17 +541,13 @@ dlg:combobox{
 
     if result == "Classic" then
       model:classic_model()
-      repaint()
-      return
     elseif result == "Slim" then
       model:slim_model()
-      repaint()
-      return
-    elseif result == "Auto" then
+    else -- "Auto"
       model:auto_model(texture)
-      repaint()
-      return
     end
+	repaint()
+	return
   end
 }
 
