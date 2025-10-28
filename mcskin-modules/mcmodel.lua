@@ -8,126 +8,153 @@ dofile("sort.lua")
 MCModel = {}
 MCModel.__index = MCModel
 
-function MCModel.new()
+function MCModel.new(spriteScaleMultiplier)
     local inst <const> = {}
     setmetatable(inst, MCModel)
 
     --define model here
-    inst["head"] = Part{pos = Vec3(0,-6,0)}
+    inst["head"] = Part{pos = Vec3(0, -6, 0)}
         :Cube{
             id   = "head",  
-            pos  = Vec3(0,-4,0),
-            uv   = Tex2(0,0), 
-            size = Vec3(8,8,8)}
+            pos  = Vec3(0, -4, 0),
+            uv   = Tex2(0, 0), 
+            size = Vec3(8, 8, 8),
+			scaleMultiplier = spriteScaleMultiplier
+		}
         :Cube{
             id   = "hat",  
-            pos  = Vec3(0,-4,0),
-            uv   = Tex2(32,0), 
-            size = Vec3(8,8,8),
+            pos  = Vec3(0, -4, 0),
+            uv   = Tex2(32, 0), 
+            size = Vec3(8, 8, 8),
             inflate = 0.5,
-            isBackfaceCulling = false}
+            isBackfaceCulling = false,
+			scaleMultiplier = spriteScaleMultiplier
+		}
 
-    inst["body"] = Part{pos = Vec3(0,-6,0)}
+    inst["body"] = Part{pos = Vec3(0, -6, 0)}
         :Cube{
             id = "body",
             pos  = Vec3(0,6,0),
-            uv = Tex2(16,16),
-            size = Vec3(8,12,4)
+            uv = Tex2(16, 16),
+            size = Vec3(8,12,4),
+			scaleMultiplier = spriteScaleMultiplier
         }
         :Cube{
             id   = "jacket",  
-            pos  = Vec3(0,6,0),
-            uv   = Tex2(16,32), 
-            size = Vec3(8,12,4),
+            pos  = Vec3(0, 6, 0),
+            uv   = Tex2(16, 32), 
+            size = Vec3(8, 12, 4),
             inflate = 0.25,
-            isBackfaceCulling = false}
+            isBackfaceCulling = false,
+			scaleMultiplier = spriteScaleMultiplier
+		}
 
-    inst["arm_r"] = Part{pos = Vec3(-5,-4,0)}
+    inst["arm_r"] = Part{pos = Vec3(-5, -4, 0)}
         :Cube{
             id = "arm_r",
-            pos  = Vec3(-1,4,0),
-            uv = Tex2(40,16),
-            size = Vec3(4,12,4)
+            pos  = Vec3(-1, 4, 0),
+            uv = Tex2(40, 16),
+            size = Vec3(4, 12, 4),
+			scaleMultiplier = spriteScaleMultiplier
         }
         :Cube{
             id   = "sleeve_r", 
-            pos  = Vec3(-1,4,0),
-            uv   = Tex2(40,32), 
-            size = Vec3(4,12,4),
+            pos  = Vec3(-1, 4, 0),
+            uv   = Tex2(40, 32), 
+            size = Vec3(4, 12, 4),
             inflate = 0.25,
-            isBackfaceCulling = false}
-    inst["arm_r_slim"] = Part{pos = Vec3(-5,-4,0)}
+            isBackfaceCulling = false,
+			scaleMultiplier = spriteScaleMultiplier
+		}
+    inst["arm_r_slim"] = Part{pos = Vec3(-5, -4, 0)}
         :Cube{
             id = "arm_r",
-            pos  = Vec3(-.5,4,0),
-            uv = Tex2(40,16),
-            size = Vec3(3,12,4)
+            pos  = Vec3(-.5, 4, 0),
+            uv = Tex2(40, 16),
+            size = Vec3(3, 12, 4),
+			scaleMultiplier = spriteScaleMultiplier
         }
         :Cube{
             id   = "sleeve_r", 
-            pos  = Vec3(-.5,4,0),
-            uv   = Tex2(40,32), 
-            size = Vec3(3,12,4),
+            pos  = Vec3(-.5, 4, 0),
+            uv   = Tex2(40, 32), 
+            size = Vec3(3, 12, 4),
             inflate = 0.25,
-            isBackfaceCulling = false}
+            isBackfaceCulling = false,
+			scaleMultiplier = spriteScaleMultiplier
+		}
 
-    inst["arm_l"] = Part{pos = Vec3(5,-4,0)}
+    inst["arm_l"] = Part{pos = Vec3(5, -4, 0)}
         :Cube{
             id = "arm_l",
-            pos  = Vec3(1,4,0),
-            uv = Tex2(32,48),
-            size = Vec3(4,12,4)}
+            pos  = Vec3(1, 4, 0),
+            uv = Tex2(32, 48),
+            size = Vec3(4, 12, 4),
+			scaleMultiplier = spriteScaleMultiplier
+		}
         :Cube{
             id   = "sleeve_l", 
-            pos  = Vec3(1,4,0),
-            uv   = Tex2(48,48), 
-            size = Vec3(4,12,4),
+            pos  = Vec3(1, 4, 0),
+            uv   = Tex2(48, 48), 
+            size = Vec3(4, 12, 4),
             inflate = 0.25,
-            isBackfaceCulling = false}
+            isBackfaceCulling = false,
+			scaleMultiplier = spriteScaleMultiplier
+		}
 
-    inst["arm_l_slim"] = Part{pos = Vec3(5,-4,0)}
+    inst["arm_l_slim"] = Part{pos = Vec3(5, -4, 0)}
         :Cube{
             id = "arm_l",
-            pos  = Vec3(.5,4,0),
-            uv = Tex2(32,48),
-            size = Vec3(3,12,4)}
+            pos  = Vec3(.5, 4, 0),
+            uv = Tex2(32, 48),
+            size = Vec3(3, 12, 4),
+			scaleMultiplier = spriteScaleMultiplier
+		}
         :Cube{
             id   = "sleeve_l", 
-            pos  = Vec3(.5,4,0),
-            uv   = Tex2(48,48), 
-            size = Vec3(3,12,4),
+            pos  = Vec3(.5, 4, 0),
+            uv   = Tex2(48, 48), 
+            size = Vec3(3, 12, 4),
             inflate = 0.25,
-            isBackfaceCulling = false}
+            isBackfaceCulling = false,
+			scaleMultiplier = spriteScaleMultiplier
+		}
 
-    inst["leg_r"] = Part{pos = Vec3(-2,6,0)}
+    inst["leg_r"] = Part{pos = Vec3(-2, 6, 0)}
         :Cube{
             id = "leg_r",
-            pos  = Vec3(0,6,0),
-            uv = Tex2(0,16),
-            size = Vec3(4,12,4)
+            pos  = Vec3(0, 6, 0),
+            uv = Tex2(0, 16),
+            size = Vec3(4, 12, 4),
+			scaleMultiplier = spriteScaleMultiplier
         }
         :Cube{
             id   = "pants_r", 
-            pos  = Vec3(0,6,0),
-            uv   = Tex2(0,32), 
-            size = Vec3(4,12,4),
+            pos  = Vec3(0, 6, 0),
+            uv   = Tex2(0, 32), 
+            size = Vec3(4, 12, 4),
             inflate = 0.25,
-            isBackfaceCulling = false}
+            isBackfaceCulling = false,
+			scaleMultiplier = spriteScaleMultiplier
+		}
 
-    inst["leg_l"] = Part{pos = Vec3(2,6,0)}
+    inst["leg_l"] = Part{pos = Vec3(2, 6, 0)}
         :Cube{
             id = "leg_l",
-            pos  = Vec3(0,6,0),
-            uv = Tex2(16,48),
-            size = Vec3(4,12,4)
+            pos  = Vec3(0, 6, 0),
+            uv = Tex2(16, 48),
+            size = Vec3(4, 12, 4),
+			scaleMultiplier = spriteScaleMultiplier
         }
         :Cube{
             id   = "pants_l", 
-            pos  = Vec3(0,6,0),
-            uv   = Tex2(0,48), 
-            size = Vec3(4,12,4),
+            pos  = Vec3(0, 6, 0),
+            uv   = Tex2(0, 48), 
+            size = Vec3(4, 12, 4),
             inflate = 0.25,
-            isBackfaceCulling = false}
+            isBackfaceCulling = false,
+			scaleMultiplier = spriteScaleMultiplier
+		}
     
     inst.isSlim = false
     return inst
@@ -203,8 +230,7 @@ function MCModel:reset_pose()
 end
 
 
-function MCModel:draw(texture, camera, gc,light_dir, AA)
-
+function MCModel:draw(texture, camera, gc, light_dir, AA)
     gc.strokeWidth = 1
     --initialize rotmatrices
     local matProj = Mat4x4.proj(30, gc.height / gc.width, 0.1, 1000)
@@ -218,12 +244,12 @@ function MCModel:draw(texture, camera, gc,light_dir, AA)
         if type(part) ~= "table" then goto continue_b end
         if not part.isVisible then goto continue_b end
 
-        local worldRot = Mat4x4.rot(part.rot.x,part.rot.y,part.rot.z)
-        local worldPos = Mat4x4.trans(part.pos.x,part.pos.y,part.pos.z)
+        local worldRot = Mat4x4.rot(part.rot.x, part.rot.y, part.rot.z)
+        local worldPos = Mat4x4.trans(part.pos.x, part.pos.y, part.pos.z)
         local worldView = Mat4x4.matMul(worldRot, worldPos)
         
         --project to world
-        for _,cube in pairs(part.mesh) do
+        for _, cube in pairs(part.mesh) do
 
             if not cube.isVisible then goto continue end
             
@@ -297,10 +323,8 @@ function MCModel:draw(texture, camera, gc,light_dir, AA)
                     end
                 end
             end
-            
             ::continue::
         end
-
         ::continue_b::
     end
 
@@ -330,6 +354,16 @@ function MCModel:draw(texture, camera, gc,light_dir, AA)
 
     -- gc:closePath()
     -- gc:fill()
+end
+
+function MCModel:updateUV(uvScaleMultiplier)
+	for key, part in pairs(self) do
+		if type(part) == "table" then
+			for _, cube in pairs(part.mesh) do
+				cube:setUV(uvScaleMultiplier)
+			end
+		end
+	end
 end
 
 function MCModel:__tostring()
