@@ -276,9 +276,7 @@ texture_changed = function(ev)
 				else
 					app.alert("Error: Canvas changed to an invalid size")
 				end
-			end
-		
-			if dlg.data["toggle_mirror"] and app.cel then	
+			elseif dlg.data["toggle_mirror"] and app.cel then	
 
 				--if were mirroring
 				last_cell = curr_cell:clone()
@@ -290,22 +288,24 @@ texture_changed = function(ev)
 				end
 
 				if (not ev.fromUndo) then
-					
 
-					for x=0, 63 do
-						for y=0,63 do
-							local a = Color(last_cell:getPixel(x,y))
-							local b = Color(curr_cell:getPixel(x,y))
+					for x = 0, (64*spriteScaleMultiplier) - 1 do
+						for y = 0, (64*spriteScaleMultiplier) - 1 do
+							local a = Color(last_cell:getPixel(x, y)) -- old color being drawn over
+							local b = Color(curr_cell:getPixel(x, y)) -- new color
 
-							if a.rgbaPixel ~= b.rgbaPixel	then
-								local c
+							if a.rgbaPixel ~= b.rgbaPixel then
+								local c -- determines where the pixel gets mirrored to (via mirror map colors)
+								local curr_mirrorMap
 								if model.isSlim then
-									c = mirror_map_slim:getPixel(x,y)
+									curr_mirrorMap = mirror_map_slim
 								else
-									c = mirror_map:getPixel(x,y)
+									curr_mirrorMap = mirror_map
 								end
+								curr_mirrorMap:resize(64*spriteScaleMultiplier, 64*spriteScaleMultiplier)
+								c = curr_mirrorMap:getPixel(x, y)
 
-								curr_cell:drawPixel(app.pixelColor.rgbaR(c)/4,app.pixelColor.rgbaG(c)/4,b)
+								curr_cell:drawPixel((app.pixelColor.rgbaR(c)/4)*spriteScaleMultiplier, (app.pixelColor.rgbaG(c)/4)*spriteScaleMultiplier, b)
 							end
 						end
 					end
