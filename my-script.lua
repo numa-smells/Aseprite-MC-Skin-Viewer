@@ -26,7 +26,7 @@ function init(plugin)
             return false
         end
 
-        if not (app.sprite.width == 64 and app.sprite.height == 64) then
+        if not (app.sprite.width%64 == 0 and app.sprite.height%64 == 0) then
             return false
         end
 
