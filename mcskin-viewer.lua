@@ -16,20 +16,28 @@ if not app.sprite then
 end
 
 local spriteScaleMultiplier = 1
-if not (app.sprite.width%64 == 0 and app.sprite.height%64 == 0) then -- checks if this sprite is a multiple of 64 (i.e. 128, 256, etc etc)
+if not (app.sprite.width%64 == 0 and app.sprite.height%64 == 0 and app.sprite.width == app.sprite.height) then -- checks if this sprite is a multiple of 64 (i.e. 128, 256, etc etc)
 	app.alert("The sprite canvas must be a multiple of 64 x 64")
 	return
 else
 	spriteScaleMultiplier = app.sprite.width/64 -- if it's 64 x 64, scale multiplier will be 1. higher, it'll be 2, 3, etc
 end
 
+if (app.sprite.width > 64) then
+	--warning
+	local result = app.alert{text="HD Skins may introduce lag or frame drops. Do you wish to proceed?", buttons={"OK", "Cancel"}}
+	if result == 2 then
+		return
+	end
+end
+
 --keep track of all windows
-if(mcSkinViewers == nil) then
-	mcSkinViewers = {}
+if(MCSkinViewers == nil) then
+	MCSkinViewers = {}
 end
 
 --check if this already exists
-for _, sprite in pairs(mcSkinViewers) do
+for _, sprite in pairs(MCSkinViewers) do
 	if sprite == app.sprite then
 		return
 	end
@@ -57,7 +65,7 @@ texture:drawSprite(curr_sprite, app.frame.frameNumber)
 
 model:auto_model(texture)
 
-function getLocalFilename(sprite)
+local function getLocalFilename(sprite)
 	local short_filename = ""
 	for w in string.gmatch(sprite.filename, "([^"..app.fs.pathSeparator.."]+)") do
 		short_filename = w
@@ -156,13 +164,7 @@ local timer = Timer{
 		elseif pose == "1st Person"	then
 			camera.pos = Vec3(0,0,1.5)
 			camera.rot = Vec3(0,3.14,0)
-			--camera.pos.z = 0
-			-- model["arm_r"].pos = camera.pos:copy()
-			-- model["arm_r"].pos.z = math.exp(model["arm_r"].pos.z)
-			-- model["arm_r"].pos = Vec3.mult(model["arm_r"].pos, -1)
 			
-			-- model["arm_r"].pos = model["arm_r"].pos + Vec3(0,0,2)
-
 			model["arm_r_slim"].pos.x = -9/8
 			model["arm_l_slim"].pos.x = 9/8
 			model["arm_r"].pos.x = -9/8
@@ -217,16 +219,16 @@ dlg = Dialog{
 		timer:stop()
 
 		
-		for i=1, #mcSkinViewers do
-			if mcSkinViewers[i] == curr_sprite then
-				table.remove(mcSkinViewers,i)
+		for i=1, #MCSkinViewers do
+			if MCSkinViewers[i] == curr_sprite then
+				table.remove(MCSkinViewers,i)
 				return
 			end
 		end
 	end
 }
 
-table.insert(mcSkinViewers, curr_sprite)
+table.insert(MCSkinViewers, curr_sprite)
 
 repaint_force = function()
 	dlg:repaint()
@@ -335,10 +337,9 @@ curr_sprite.events:on('layervisibility', texture_changed)
 app.events:on('sitechange', texture_changed)
 curr_sprite.events:on('filenamechange', on_filenamechange)
 
-local fps_timer = Timer{}
 local slow_rate = 0
 
-function onpaint(ev)
+local function onpaint(ev)
 
 	local startTime = os.clock()
 
