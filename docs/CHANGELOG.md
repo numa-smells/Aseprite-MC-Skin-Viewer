@@ -98,7 +98,7 @@ _No changes._
 - `lib3D.lua` is now depricated.
 - Removed Herobrine.
 ### Fix
-- Rendering is now twice as fast(?) from optimizations.
+- Rendering is ~60% faster(?) from optimizations. (worst case ~20fps now ~30fps)
 
 
 ### Known Issues
