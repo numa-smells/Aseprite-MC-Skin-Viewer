@@ -34,6 +34,28 @@ function init(plugin)
     end
   }
 
+  plugin:newCommand{
+    id="MCSkinProfiler",
+    title="MC Skin Profiler",
+    group="view_screen",
+    onclick=function()
+      PluginPath = plugin.path
+      VERSION = plugin.version
+      dofile(plugin.path..app.fs.pathSeparator.."mcskin-profiler.lua")
+    end,
+    onenabled=function()
+        if not app.sprite then
+            return false
+        end
+
+        if not (app.sprite.width%64 == 0 and app.sprite.height%64 == 0 and app.sprite.width == app.sprite.height) then
+            return false
+        end
+
+        return true
+    end
+  }
+
   
 end
 

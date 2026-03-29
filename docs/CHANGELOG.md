@@ -89,6 +89,18 @@ _No changes._
 - Greyscale and Indexed color modes are now supported. ([#2](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/2),[#7](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/7))
 - Crash upon opening with an empty frame. ([#5](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/5))
 
+## [v1.2.0-beta] - 2026
+### Changed
+- Window size stays consistent when hiding tools.
+### Added
+- New Profiler to test rendering time.
+### Removed
+- `lib3D.lua` is now depricated.
+- Removed Herobrine.
+### Fix
+- Rendering is now twice as fast(?) from optimizations.
+
+
 ### Known Issues
 - Pasting while mirror draw is on is broken.
 - Model continues to rotate after resizing dialog in multiple window mode. ([Issue on Aseprite's side, waiting for fix](https://github.com/aseprite/aseprite/issues/5449))

@@ -1,3 +1,9 @@
 {
-  "Lua.workspace.library": ["lib\\Aseprite-Library\\Aseprite-Library.lua"]
+  "Lua.workspace.library": [
+    "lib\\Aseprite-Library\\Aseprite-Library.lua"
+  ],
+  "Lua.diagnostics.disable": [
+    "unused-local",
+    "redundant-parameter"
+  ]
 }

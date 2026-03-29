@@ -1,4 +1,194 @@
-dofile("lib3D.lua")
+--dofile("lib3D.lua")
+local max, min, abs = math.max,math.min,math.abs
+
+local function triangle(p, t)
+
+  return {
+    t = t or {Tex2(),Tex2(),Tex2(),Tex2()},
+    p = p or {Vec3(),Vec3(),Vec3(),Vec3()},
+    c = 0
+  }
+end
+
+local function Vec2(x,y)
+    return {x = x or 0, y = y or 0}
+end
+
+local function clip(plane_p, plane_n, in_tri)
+  local plane_n = Vec3.norm(plane_n)
+  local dist = function(p)
+    local n = Vec3.norm(p)
+    return (plane_n.x * p.x + plane_n.y * p.y + plane_n.z * p.z - Vec3.dot(plane_n, plane_p))
+  end
+  
+  -- Create two temporary storage arrays to classify points either side of plane
+	-- If distance sign is positive, point lies on "inside" of plane
+	-- Get signed distance of each point in triangle to plane
+  local d0 = dist(in_tri.p[1])
+  local d1 = dist(in_tri.p[2])
+  local d2 = dist(in_tri.p[3])
+  local d3 = dist(in_tri.p[4])
+
+  return (d0 >= 0 and d1 >= 0 and d2 >= 0 and d3 >= 0)
+end
+
+
+local function lerp4(a,b,c,d,t1,t2)
+  return ((d-c-b+a)*t1 - a+c)*t2 + ((b-a)*t1 + a)
+end
+local function naive_rectclip(w,h,t)
+  for i=1, 4 do
+    local p = t[i]
+    if p.x >=0 and p.x < w and p.y >= 0 and p.y < h then
+      return true
+    end
+  end
+
+  return false
+end
+
+local color_samples = {}
+local pixel_coord_x = {}
+local pixel_coord_y = {}
+--biggest face is on the torso 12 * 8, TODO: scale relative to multiplier
+
+--this is the most expensive function
+local function splitQuad(buffer,tri,texture, gc, backside_showing)
+  local ax, ay, aw, az = tri.p[1].x, tri.p[1].y, tri.p[1].w , tri.p[1].z
+  local bx, by, bw, bz = tri.p[2].x, tri.p[2].y, tri.p[2].w , tri.p[2].z
+  local cx, cy, cw, cz = tri.p[3].x, tri.p[3].y, tri.p[3].w , tri.p[3].z
+  local dx, dy, dw, dz = tri.p[4].x, tri.p[4].y, tri.p[4].w , tri.p[4].z
+
+  local au, av = tri.t[1].u, tri.t[1].v
+  local bu, bv = tri.t[2].u, tri.t[2].v
+  local cu, cv = tri.t[3].u, tri.t[3].v
+  local du, dv = tri.t[4].u, tri.t[4].v
+
+  local wd = (abs(max(au,bu,cu,du) - min(au,bu,cu,du)) // 1)
+  local hd = (abs(max(av,bv,cv,dv) - min(av,bv,cv,dv)) // 1)
+
+  local gcw2 = gc.width / 2
+  local gch2 = gc.height / 2
+  
+  --color pass
+  for i=0, wd-1 do
+    for j=0, hd-1 do
+        if backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 1 then
+            color_samples[1+j+i*hd] = nil
+            goto skip_color
+        end
+        local k = i/wd
+        local l = j/hd
+        local tex_w = 1 / wd
+        local tex_h = 1 / hd
+
+        local tex_u = lerp4(au,bu,cu,du,k+tex_w/2,l+tex_h/2)
+        local tex_v = lerp4(av,bv,cv,dv,k+tex_w/2,l+tex_h/2)
+
+        local c = Color(texture:getPixel(tex_u,tex_v))
+        
+        if c.alpha > 0 then
+            color_samples[1+j+i*hd] = c
+        else
+            color_samples[1+j+i*hd] = nil
+        end 
+
+        ::skip_color::
+    end
+  end
+
+  --pixel coords pass
+  for i=0, wd do
+    for j=0, hd do
+        if backside_showing and i > 1 and i < wd -1 and j > 1 and j <hd-1 then
+            goto skip_coord
+        end
+
+        --only compute if any surrounding color exists
+        -- c1|c2
+        -- — O —
+        -- c3|c4
+
+        if color_samples[1+j+i*hd] or color_samples[j+i*hd] or color_samples[1+j+(i-1)*hd] or color_samples[j+(i-1)*hd] then
+            local k = i/wd
+            local l = j/hd
+
+            local w = lerp4(aw,bw,cw,dw,k,l)
+            pixel_coord_x[1+j+i*(hd+1)] = (lerp4(ax,bx,cx,dx,k,l)/w+1)*gcw2
+            pixel_coord_y[1+j+i*(hd+1)] = (lerp4(ay,by,cy,dy,k,l)/w+1)*gch2
+        end
+        ::skip_coord::
+    end
+  end
+
+ -- assert(#pixel_coords == (wd+1)*(hd+1))
+
+  for i=0, wd-1 do
+    for j=0, hd-1 do
+      --i actually dont need to draw some of these
+      if backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 1 then
+        goto skip_split
+      end
+
+      local c = color_samples[1+j+i*hd]
+      
+      if c then
+        c.value = c.value * tri.c
+
+        -- 1 -- 2
+        -- |    |
+        -- 3 -- 4
+
+        local x1 = pixel_coord_x[1+j+i*(hd+1)]
+        local y1 = pixel_coord_y[1+j+i*(hd+1)]
+
+        local x2 = pixel_coord_x[1+j+(i+1)*(hd+1)]
+        local y2 = pixel_coord_y[1+j+(i+1)*(hd+1)]
+
+        local x3 = pixel_coord_x[2+j+i*(hd+1)]
+        local y3 = pixel_coord_y[2+j+i*(hd+1)]
+
+        local x4 = pixel_coord_x[2+j+(i+1)*(hd+1)]
+        local y4 = pixel_coord_y[2+j+(i+1)*(hd+1)]
+
+        local newtri = {Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3),c,0}
+
+        if naive_rectclip(gc.width,gc.height,newtri) then
+          local k = (2*i+1) / wd
+          newtri[6] = ((dz-cz-bz+az)*k-(az-cz)*2)*(2*j+1) / hd + ((bz-az)*k+az*2)*2 --average z
+          table.insert(buffer, newtri)
+        end
+      end
+
+      :: skip_split ::
+    end
+  end
+end
+
+local function drawQuad(gc, tri,AA) 
+  
+
+  gc.color = tri[5]
+        
+  gc:beginPath()
+  gc:moveTo(tri[1].x, tri[1].y)
+
+  for i=2, 4 do
+    gc:lineTo(tri[i].x, tri[i].y)
+  end
+
+  gc:closePath()
+  
+  if tri[5].alpha == 255 and AA then
+    gc.antialias = true
+    gc:fill()
+    gc:stroke()
+  else
+    gc.antialias = false
+    gc:fill()
+  end
+end
+
 dofile("vec3.lua")
 dofile("tex2.lua")
 dofile("mat4x4.lua")
@@ -238,7 +428,7 @@ function MCModel:draw(texture, camera, gc, light_dir, AA)
     local rot = Mat4x4.rot(camera.rot.x,camera.rot.y,camera.rot.z)
     local trans = Mat4x4.trans(camera.pos.x, camera.pos.y, math.exp(camera.pos.z))
     local matView = Mat4x4.matMul(rot, trans)
-
+    
     local faceBuffer = {}
     for key, part in pairs(self) do
         if type(part) ~= "table" then goto continue_b end
@@ -275,8 +465,8 @@ function MCModel:draw(texture, camera, gc, light_dir, AA)
 
             --faces
             for i=1, 6 do
-                face = cube.faces[i]
-                uv = cube.uv[i]
+                local face = cube.faces[i]
+                local uv = cube.uv[i]
 
                 local line1 = pointBuffer[face[2]] - pointBuffer[face[1]]
                 local line2 = pointBuffer[face[4]] - pointBuffer[face[1]]
@@ -327,33 +517,121 @@ function MCModel:draw(texture, camera, gc, light_dir, AA)
         end
         ::continue_b::
     end
-
-    table.stable_sort(faceBuffer,function(a,b) return a.sortby > b.sortby end)
-
-    for i = 1, #faceBuffer do
-        local x = faceBuffer[i]
-        drawQuad(gc, x, AA) 
+    table.stable_sort(faceBuffer,function(a,b) return a[6] > b[6] end)
+    local n = #faceBuffer
+    for i = 1, n do
+        drawQuad(gc, faceBuffer[i], AA) 
     end
+end
 
-    --DEBUG DRAW PIVOTS
-    -- gc.color = Color{r = 0,g = 255,b = 255, a = 255}
-    -- gc:beginPath()
-    -- for key, part in pairs(self) do
-    --     local pivot = part.pos
+function MCModel:draw_profile(texture, camera, gc, light_dir, AA)
+    gc.strokeWidth = 1
+    --initialize rotmatrices
+    local matProj = Mat4x4.proj(30, gc.height / gc.width, 0.1, 1000)
 
-    --     pivot = mat_MulVec3D(pivot, matView)
-    --     pivot = mat_MulVec3D(pivot, matProj)
+    local rot = Mat4x4.rot(camera.rot.x,camera.rot.y,camera.rot.z)
+    local trans = Mat4x4.trans(camera.pos.x, camera.pos.y, math.exp(camera.pos.z))
+    local matView = Mat4x4.matMul(rot, trans)
+    
+    local profileTimes = {}
+    local faceBuffer = {}
+    for key, part in pairs(self) do
+        if type(part) ~= "table" then goto continue_b end
+        if not part.isVisible then goto continue_b end
 
-    --     local x1 = (pivot.x/pivot.w + 1) / 2 * gc.width
-    --     local y1 = (pivot.y/pivot.w + 1) / 2 * gc.height
+        local worldRot = Mat4x4.rot(part.rot.x, part.rot.y, part.rot.z)
+        local worldPos = Mat4x4.trans(part.pos.x, part.pos.y, part.pos.z)
+        local worldView = Mat4x4.matMul(worldRot, worldPos)
         
-    --     local r = 5
-    --     gc:oval(x1-r/2,y1-r/2,r,r)
-        
-    -- end
+        --project to world
+        for _, cube in pairs(part.mesh) do
 
-    -- gc:closePath()
-    -- gc:fill()
+            if not cube.isVisible then goto continue end
+            
+            local pointBuffer = {}
+            local proj_pointBuffer = {}
+
+            for i=1, 8 do
+                local projPoint = cube.points[i]
+
+                --move to world pos
+                projPoint = Vec3.applyMat4x4(projPoint, worldView)
+
+                --move respect to camera
+                projPoint = Vec3.applyMat4x4(projPoint, matView)
+
+                --projection
+                proj_pointBuffer[i] = Vec3.applyMat4x4(projPoint, matProj)
+
+                --push to point buffer
+                pointBuffer[i] = projPoint
+                
+            end
+
+            --faces
+            for i=1, 6 do
+                local face = cube.faces[i]
+                local uv = cube.uv[i]
+
+                local line1 = pointBuffer[face[2]] - pointBuffer[face[1]]
+                local line2 = pointBuffer[face[4]] - pointBuffer[face[1]]
+
+                local normal = Vec3.norm(Vec3.cross(line1,line2))
+
+                if (not cube.isBackfaceCulling) or ( Vec3.dot(normal, pointBuffer[face[1]]) < 0) then
+                    local dp = 1
+                    
+                    if light_dir == "Front" then
+                        dp = -normal.z
+                    elseif light_dir == "Top" then
+                        dp = -normal.y
+                    end
+                    
+                    local backside_showing = not cube.isBackfaceCulling and normal.z > 0
+                    if backside_showing then
+                        dp = math.abs(dp)
+                    end
+
+                    local projTri = triangle()
+        
+                    projTri.p[1] = pointBuffer[face[1]]
+                    projTri.p[2] = pointBuffer[face[2]]
+                    projTri.p[3] = pointBuffer[face[3]]
+                    projTri.p[4] = pointBuffer[face[4]]
+                        
+                    if clip(Vec3(0,0,0.1), Vec3(0,0,1), projTri) then
+
+                        projTri.c = (dp + 1)/4 + .5
+
+                        projTri.t[1] = uv[1]
+                        projTri.t[2] = uv[2]
+                        projTri.t[3] = uv[3]
+                        projTri.t[4] = uv[4]
+
+                        projTri.p[1] = proj_pointBuffer[face[1]]
+                        projTri.p[2] = proj_pointBuffer[face[2]]
+                        projTri.p[3] = proj_pointBuffer[face[3]]
+                        projTri.p[4] = proj_pointBuffer[face[4]]
+
+
+                        splitQuad(faceBuffer,projTri, texture,gc, backside_showing)
+                    end
+                end
+            end
+            ::continue::
+        end
+        ::continue_b::
+    end
+    profileTimes[1] = os.clock()
+    
+    table.stable_sort(faceBuffer,function(a,b) return a[6] > b[6] end)
+    profileTimes[2] = os.clock()
+    local n = #faceBuffer
+    for i = 1, n do
+        drawQuad(gc, faceBuffer[i], AA) 
+    end
+    profileTimes[3] = os.clock()
+    return profileTimes
 end
 
 function MCModel:updateUV(uvScaleMultiplier)
