@@ -52,6 +52,7 @@ local model = MCModel.new(spriteScaleMultiplier)
 
 local showDebug = false
 local AA = true
+local tools_visible = true
 
 local camera = {
 	pos = Vec3(0,0,2.3),
@@ -208,7 +209,7 @@ local timer = Timer{
 
 dlg = Dialog{
 	title=getLocalFilename(curr_sprite),
-	autofit = Align.BOTTOM,
+	autofit = Align.TOP,
 	onclose = function(ev)
 		app.events:off(texture_changed)
 		curr_sprite.events:off(texture_changed)
@@ -345,7 +346,8 @@ local function onpaint(ev)
 
 	local gc = ev.context
 
-	gc.color = gc.theme.color.editor_face
+	--gc.color = gc.theme.color.editor_face
+	gc.color = dlg.data["bg_color"]
 	gc:fillRect(Rectangle(0,0,gc.width,gc.height))
 	model:draw(texture, camera, gc, dlg.data["light_dir"], AA)
 	gc:drawThemeRect("editor_selected", 0,0,gc.width, gc.height)
@@ -384,7 +386,10 @@ function onmousemove(ev)
 	elseif ev.button == MouseButton.RIGHT then
 		local d = dlg.bounds
 		--local cw = d.width - cw_offset 
-		local ch = d.height - ch_offset
+		local ch = d.height 
+		if tools_visible then
+			ch = ch - ch_offset
+		end
 
 		local zoom_offset = math.exp(camera.pos.z) / 600 * 360 / ch
 
@@ -420,7 +425,7 @@ dlg:tab{
 	text="Pose"
 }
 
--- TODO:
+-- TODO: clean this up
 
 dlg:label{text="Pose"}
 dlg:combobox{
@@ -920,12 +925,12 @@ dlg:button{
 		model["leg_r"].rot.z = -sin(fElapsedTime) * 0.78
 		model["leg_l"].rot.z = sin(fElapsedTime) * 0.7
 
-		local export_camera = {pos = Vec3(0,0,2.5), rot=Vec3(0,0.5,-0.2)}
+		local export_camera = {pos = Vec3(0,0,2.3), rot=Vec3(0,0.5,-0.2)}
 		local exportImage1 = Image(960,1080)
 
 		model:draw(texture, export_camera, exportImage1.context,dlg.data["light_dir"], true)
 
-		export_camera = {pos = Vec3(0,0,2.5), rot=Vec3(0,math.pi+0.5,-0.2)}
+		export_camera = {pos = Vec3(0,0,2.3), rot=Vec3(0,math.pi+0.5,-0.2)}
 		local exportImage2 = Image(960,1080)
 		model:draw(texture, export_camera, exportImage2.context,dlg.data["light_dir"], true)
 
@@ -980,12 +985,13 @@ dlg:endtabs{
 
 }
 
-local tools_visible = true
 dlg:button{
 	id="hide",
 	text="▼",
 	onclick = function()
 		tools_visible = not tools_visible
+
+		local bounds = dlg.bounds
 		dlg:modify{id="end_tab", visible = tools_visible}
 		
 		if tools_visible then
@@ -993,6 +999,8 @@ dlg:button{
 		else
 			dlg:modify{id="hide", text = "▲"}
 		end
+
+		dlg.bounds = bounds
 		
 	end
 }
