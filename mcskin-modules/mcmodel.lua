@@ -46,6 +46,7 @@ end
 local color_samples = {}
 local pixel_coord_x = {}
 local pixel_coord_y = {}
+local pixel_coord_z = {}
 --biggest face is on the torso 12 * 8, TODO: scale relative to multiplier
 
 --this is the most expensive function since it runs for every pixel
@@ -114,28 +115,34 @@ local function splitQuad(buffer,tri,texture, gc, backside_showing)
     --pixel coords pass
     local ax_start = ax * gcw2
     local ay_start = ay * gch2 
+    local az_start = az
     local aw_start = aw
 
     local delta_ax = (bx-ax)/wd * gcw2
     local delta_ay = (by-ay)/wd * gch2
+    local delta_az = (bz-az)/wd
     local delta_aw = (bw-aw)/wd
 
     local cx_start = cx * gcw2
     local cy_start = cy * gch2
+    local cz_start = cz
     local cw_start = cw
 
     local delta_cx = (dx-cx)/wd * gcw2
     local delta_cy = (dy-cy)/wd * gch2
+    local delta_cz = (dz-cz)/wd
     local delta_cw = (dw-cw)/wd
 
     for i=0, wd do
         local delta_bw = (cw_start-aw_start)/hd
         local delta_bx = (cx_start-ax_start)/hd
         local delta_by = (cy_start-ay_start)/hd
+        local delta_bz = (cz_start-az_start)/hd
         
         local start_bw = aw_start
         local start_bx = ax_start
         local start_by = ay_start
+        local start_bz = az_start
 
         for j=0, hd do
             if backside_showing and i > 1 and i < wd -1 and j > 1 and j <hd-1 then
@@ -151,6 +158,7 @@ local function splitQuad(buffer,tri,texture, gc, backside_showing)
                 local index = 1+j+i*(hd+1)
                 pixel_coord_x[index] = start_bx/start_bw + gcw2
                 pixel_coord_y[index] = start_by/start_bw + gch2
+                pixel_coord_z[index] = start_bz
             end
 
             ::skip_coord::
@@ -158,56 +166,85 @@ local function splitQuad(buffer,tri,texture, gc, backside_showing)
             start_bw = start_bw + delta_bw
             start_bx = start_bx + delta_bx
             start_by = start_by + delta_by
+            start_bz = start_bz + delta_bz
         end
 
         ax_start = ax_start + delta_ax
         ay_start = ay_start + delta_ay
+        az_start = az_start + delta_az
         aw_start = aw_start + delta_aw
 
         cx_start = cx_start + delta_cx
         cy_start = cy_start + delta_cy
+        cz_start = cz_start + delta_cz
         cw_start = cw_start + delta_cw
     end
 
     -- faces
     for i=0, wd-1 do
-        for j=0, hd-1 do
+        local j = 0
+        local c = nil
+
+        while j < hd do
             --i actually dont need to draw some of these
             if backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 1 then
                 goto skip_split
             end
 
-            local c = color_samples[1+j+i*hd]
+            c = color_samples[1+j+i*hd]
             
-            if c==nil then
-                goto skip_split
+            if c~=nil then
+
+                
+
+                local x1 = pixel_coord_x[1+j+i*(hd+1)]
+                local y1 = pixel_coord_y[1+j+i*(hd+1)]
+                local z1 = pixel_coord_z[1+j+i*(hd+1)]
+
+                local x2 = pixel_coord_x[1+j+(i+1)*(hd+1)]
+                local y2 = pixel_coord_y[1+j+(i+1)*(hd+1)]
+                local z2 = pixel_coord_z[1+j+(i+1)*(hd+1)]
+
+                local x3 = pixel_coord_x[2+j+i*(hd+1)]
+                local y3 = pixel_coord_y[2+j+i*(hd+1)]
+                local z3 = pixel_coord_z[2+j+i*(hd+1)]
+
+                local x4 = pixel_coord_x[2+j+(i+1)*(hd+1)]
+                local y4 = pixel_coord_y[2+j+(i+1)*(hd+1)]
+                local z4 = pixel_coord_z[2+j+(i+1)*(hd+1)]
+
+                --greedy mesho vertically
+                local next_col = color_samples[2+j+i*hd]
+
+                while next_col and (j < hd-2) and (c.rgbaPixel == next_col.rgbaPixel) and not (backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 2) do    
+                    j = j + 1
+                    x3 = pixel_coord_x[2+j+i*(hd+1)]
+                    y3 = pixel_coord_y[2+j+i*(hd+1)]
+                    z3 = pixel_coord_z[2+j+i*(hd+1)]
+
+                    x4 = pixel_coord_x[2+j+(i+1)*(hd+1)]
+                    y4 = pixel_coord_y[2+j+(i+1)*(hd+1)]
+                    z4 = pixel_coord_z[2+j+(i+1)*(hd+1)]
+                    next_col = color_samples[2+j+i*hd]
+                end
+
+                c.value = c.value * tri.c
+
+                local newtri = {c,0,Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3)}
+
+                -- if not naive_rectclip(gc.width,gc.height,newtri) then
+                --     goto skip_split
+                -- end
+
+                local k = (2*i+1) / wd
+                newtri[2] = max(z1,z2,z3,z4)
+                table.insert(buffer, newtri)
+
+                
             end
-
-            c.value = c.value * tri.c
-
-            local x1 = pixel_coord_x[1+j+i*(hd+1)]
-            local y1 = pixel_coord_y[1+j+i*(hd+1)]
-
-            local x2 = pixel_coord_x[1+j+(i+1)*(hd+1)]
-            local y2 = pixel_coord_y[1+j+(i+1)*(hd+1)]
-
-            local x3 = pixel_coord_x[2+j+i*(hd+1)]
-            local y3 = pixel_coord_y[2+j+i*(hd+1)]
-
-            local x4 = pixel_coord_x[2+j+(i+1)*(hd+1)]
-            local y4 = pixel_coord_y[2+j+(i+1)*(hd+1)]
-
-            local newtri = {Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3),c,0}
-
-            if not naive_rectclip(gc.width,gc.height,newtri) then
-                goto skip_split
-            end
-
-            local k = (2*i+1) / wd
-            newtri[6] = ((dz-cz-bz+az)*k-(az-cz)*2)*(2*j+1) / hd + ((bz-az)*k+az*2)*2 --average z
-            table.insert(buffer, newtri)
 
             :: skip_split ::
+            j = j + 1
         end
     end
 end
@@ -215,24 +252,25 @@ end
 local function drawQuad(gc, tri,AA) 
   
 
-  gc.color = tri[5]
+  gc.color = tri[1]
         
   gc:beginPath()
-  gc:moveTo(tri[1].x, tri[1].y)
+  gc:moveTo(tri[3].x, tri[3].y)
 
-  for i=2, 4 do
+  local n = #tri
+  for i=4, n do
     gc:lineTo(tri[i].x, tri[i].y)
   end
 
   gc:closePath()
   
-  if tri[5].alpha == 255 and AA then
+  if tri[1].alpha == 255 and AA then
     gc.antialias = true
     gc:fill()
     gc:stroke()
   else
     gc.antialias = false
-    gc:fill()
+    gc:stroke()
   end
 end
 
@@ -564,7 +602,7 @@ function MCModel:draw(texture, camera, gc, light_dir, AA)
         end
         ::continue_b::
     end
-    table.stable_sort(faceBuffer,function(a,b) return a[6] > b[6] end)
+    table.stable_sort(faceBuffer,function(a,b) return a[2] > b[2] end)
     local n = #faceBuffer
     for i = 1, n do
         drawQuad(gc, faceBuffer[i], AA) 
@@ -671,7 +709,7 @@ function MCModel:draw_profile(texture, camera, gc, light_dir, AA)
     end
     profileTimes[1] = os.clock()
     
-    table.stable_sort(faceBuffer,function(a,b) return a[6] > b[6] end)
+    table.stable_sort(faceBuffer,function(a,b) return a[2] > b[2] end)
     profileTimes[2] = os.clock()
     local n = #faceBuffer
     for i = 1, n do

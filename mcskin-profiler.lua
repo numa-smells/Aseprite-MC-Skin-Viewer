@@ -77,7 +77,7 @@ local curr_frame = app.frame.frameNumber
 local curr_layer = app.layer.stackIndex
 
 
-local profile_times_total = {0,0,0}
+local profile_times_total = {0,0,0,0}
 local times = {}
 
 local function onpaint(ev)
@@ -104,6 +104,8 @@ local function onpaint(ev)
         profile_times_total[i] = profile_times_total[i] + profile_times[i] - profile_times[i-1]
         
     end
+
+    profile_times_total[4] = profile_times_total[4] + profile_times[3] - startTime
 
     gc.strokeWidth = 2
     
@@ -136,13 +138,23 @@ local function onpaint(ev)
         gc:lineTo(320.0*i/#times,320-times[i][3]*2000)
     end
     gc:stroke()
+
+    gc.color = gc.theme.color.text
+    gc:fillText("Total:  "..string.sub(tostring(profile_times_total[4]), 1,5), 8, 48)
 end
 
 local pi = math.pi
 local step = 2*math.pi/10
+
 local timer = Timer{
     interval = 1.0/30,
     ontick = function()
+        for key, part in pairs(model) do
+            if type(part) == "table" then
+                part.rot = Vec3(rnd(),rnd(),rnd())
+            end
+        end
+
         if camera.rot.z <= pi*2 then
             if camera.rot.y <= pi*2 then
                 dlg:repaint()
@@ -156,13 +168,9 @@ local timer = Timer{
 }
 
 function test()
-    -- for key, part in pairs(model) do
-    --     if type(part) == "table" then
-    --         part.rot = Vec3(rnd(),rnd(),rnd())
-    --     end
-    -- end
 
-    profile_times_total = {0, 0, 0}
+
+    profile_times_total = {0,0,0,0}
     times = {}
     camera.rot.z = 0
     camera.rot.y = 0
