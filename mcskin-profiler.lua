@@ -143,12 +143,12 @@ local step = 2*math.pi/10
 local timer = Timer{
     interval = 1.0/30,
     ontick = function()
-        if camera.rot.z <= pi then
-            if camera.rot.y <= pi then
+        if camera.rot.z <= pi*2 then
+            if camera.rot.y <= pi*2 then
                 dlg:repaint()
                 camera.rot.y = camera.rot.y + step
             else
-                camera.rot.y = -pi
+                camera.rot.y = 0
                 camera.rot.z = camera.rot.z + step
             end
         end
@@ -156,16 +156,16 @@ local timer = Timer{
 }
 
 function test()
-    for key, part in pairs(model) do
-        if type(part) == "table" then
-            part.rot = Vec3(rnd(),rnd(),rnd())
-        end
-    end
+    -- for key, part in pairs(model) do
+    --     if type(part) == "table" then
+    --         part.rot = Vec3(rnd(),rnd(),rnd())
+    --     end
+    -- end
 
     profile_times_total = {0, 0, 0}
     times = {}
-    camera.rot.z = -pi
-    camera.rot.y = -pi
+    camera.rot.z = 0
+    camera.rot.y = 0
 
     timer:start()
 end

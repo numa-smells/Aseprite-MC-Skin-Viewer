@@ -44,16 +44,16 @@ function Cube:setUV(uvScaleMultiplier)
 			Tex2((u+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
 		},
 		{ --BOTTOM
-			Tex2((u+dt+wt)*uvScaleMultiplier, v*uvScaleMultiplier),
-			Tex2((u+dt+wt+wt)*uvScaleMultiplier, v*uvScaleMultiplier),
-			Tex2((u+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
-			Tex2((u+wt+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			Tex2((u+dt+wt)*uvScaleMultiplier, 	(v+1)*uvScaleMultiplier),
+			Tex2((u+dt+wt+wt)*uvScaleMultiplier,(v+1)*uvScaleMultiplier),
+			Tex2((u+dt+wt)*uvScaleMultiplier, 	(v+dt+1)*uvScaleMultiplier),
+			Tex2((u+wt+dt+wt)*uvScaleMultiplier,(v+dt+1)*uvScaleMultiplier)
 		},
 		{ --TOP
-			Tex2((u+wt+dt)*uvScaleMultiplier, v*uvScaleMultiplier),
-			Tex2((u+dt)*uvScaleMultiplier, v*uvScaleMultiplier),
-			Tex2((u+wt+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
-			Tex2((u+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			Tex2((u+wt+dt-1)*uvScaleMultiplier, (v+1)*uvScaleMultiplier),
+			Tex2((u+dt-1)*uvScaleMultiplier, 	(v+1)*uvScaleMultiplier),
+			Tex2((u+wt+dt-1)*uvScaleMultiplier, (v+dt+1)*uvScaleMultiplier),
+			Tex2((u+dt-1)*uvScaleMultiplier, 	(v+dt+1)*uvScaleMultiplier)
 		}
 	}
 	return self

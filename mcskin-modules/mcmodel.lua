@@ -32,9 +32,13 @@ local function clip(plane_p, plane_n, in_tri)
   return (d0 >= 0 and d1 >= 0 and d2 >= 0 and d3 >= 0)
 end
 
+local function lerp(a,b,t)
+  return (b-a)*t + a
+end
 
 local function lerp4(a,b,c,d,t1,t2)
-  return ((d-c-b+a)*t1 - a+c)*t2 + ((b-a)*t1 + a)
+  --return ((d-c-b+a)*t1 - a+c)*t2 + ((b-a)*t1 + a)
+  return lerp(lerp(a,b,t1),lerp(c,d,t1),t2)
 end
 local function naive_rectclip(w,h,t)
   for i=1, 4 do
@@ -54,115 +58,166 @@ local pixel_coord_y = {}
 
 --this is the most expensive function
 local function splitQuad(buffer,tri,texture, gc, backside_showing)
-  local ax, ay, aw, az = tri.p[1].x, tri.p[1].y, tri.p[1].w , tri.p[1].z
-  local bx, by, bw, bz = tri.p[2].x, tri.p[2].y, tri.p[2].w , tri.p[2].z
-  local cx, cy, cw, cz = tri.p[3].x, tri.p[3].y, tri.p[3].w , tri.p[3].z
-  local dx, dy, dw, dz = tri.p[4].x, tri.p[4].y, tri.p[4].w , tri.p[4].z
+    local ax, ay, aw, az = tri.p[1].x, tri.p[1].y, tri.p[1].w , tri.p[1].z
+    local bx, by, bw, bz = tri.p[2].x, tri.p[2].y, tri.p[2].w , tri.p[2].z
+    local cx, cy, cw, cz = tri.p[3].x, tri.p[3].y, tri.p[3].w , tri.p[3].z
+    local dx, dy, dw, dz = tri.p[4].x, tri.p[4].y, tri.p[4].w , tri.p[4].z
 
-  local au, av = tri.t[1].u, tri.t[1].v
-  local bu, bv = tri.t[2].u, tri.t[2].v
-  local cu, cv = tri.t[3].u, tri.t[3].v
-  local du, dv = tri.t[4].u, tri.t[4].v
+    local au, av = tri.t[1].u, tri.t[1].v
+    local bu, bv = tri.t[2].u, tri.t[2].v
+    local cu, cv = tri.t[3].u, tri.t[3].v
+    local du, dv = tri.t[4].u, tri.t[4].v
 
-  local wd = (abs(max(au,bu,cu,du) - min(au,bu,cu,du)) // 1)
-  local hd = (abs(max(av,bv,cv,dv) - min(av,bv,cv,dv)) // 1)
+    local wd = (abs(max(au,bu,cu,du) - min(au,bu,cu,du)) // 1)
+    local hd = (abs(max(av,bv,cv,dv) - min(av,bv,cv,dv)) // 1)
 
-  local gcw2 = gc.width / 2
-  local gch2 = gc.height / 2
-  
-  --color pass
-  for i=0, wd-1 do
-    for j=0, hd-1 do
-        if backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 1 then
-            color_samples[1+j+i*hd] = nil
-            goto skip_color
-        end
-        local k = i/wd
-        local l = j/hd
-        local tex_w = 1 / wd
-        local tex_h = 1 / hd
+    local gcw2 = gc.width / 2
+    local gch2 = gc.height / 2
+    
+    --color pass
+    local start_au = au 
+    local start_av = av - .5
 
-        local tex_u = lerp4(au,bu,cu,du,k+tex_w/2,l+tex_h/2)
-        local tex_v = lerp4(av,bv,cv,dv,k+tex_w/2,l+tex_h/2)
+    local delta_au = (bu-au)/wd
+    local delta_av = (bv-av)/wd
+    
+    local start_cu = cu
+    local start_cv = cv - .5
 
-        local c = Color(texture:getPixel(tex_u,tex_v))
+    local delta_cu = (du-cu)/wd
+    local delta_cv = (dv-cv)/wd
+
+    for i=0, wd-1 do
+        local delta_bu = (start_cu-start_au)/hd
+        local delta_bv = (start_cv-start_av)/hd
         
-        if c.alpha > 0 then
-            color_samples[1+j+i*hd] = c
-        else
-            color_samples[1+j+i*hd] = nil
-        end 
+        local start_bu = start_au 
+        local start_bv = start_av 
 
-        ::skip_color::
-    end
-  end
+        for j=0, hd-1 do
+            if backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 1 then
+                color_samples[1+j+i*hd] = nil
+            else
+                local c = Color(texture:getPixel(start_bu,start_bv))
+                
+                if c.alpha > 0 then
+                    color_samples[1+j+i*hd] = c
+                else
+                    color_samples[1+j+i*hd] = nil
+                end 
+            end
 
-  --pixel coords pass
-  for i=0, wd do
-    for j=0, hd do
-        if backside_showing and i > 1 and i < wd -1 and j > 1 and j <hd-1 then
-            goto skip_coord
+            start_bu = start_bu + delta_bu
+            start_bv = start_bv + delta_bv
         end
 
-        --only compute if any surrounding color exists
-        -- c1|c2
-        -- — O —
-        -- c3|c4
+        start_au = start_au + delta_au
+        start_av = start_av + delta_av
 
-        if color_samples[1+j+i*hd] or color_samples[j+i*hd] or color_samples[1+j+(i-1)*hd] or color_samples[j+(i-1)*hd] then
-            local k = i/wd
-            local l = j/hd
-
-            local w = lerp4(aw,bw,cw,dw,k,l)
-            pixel_coord_x[1+j+i*(hd+1)] = (lerp4(ax,bx,cx,dx,k,l)/w+1)*gcw2
-            pixel_coord_y[1+j+i*(hd+1)] = (lerp4(ay,by,cy,dy,k,l)/w+1)*gch2
-        end
-        ::skip_coord::
+        start_cu = start_cu + delta_cu
+        start_cv = start_cv + delta_cv
     end
-  end
 
- -- assert(#pixel_coords == (wd+1)*(hd+1))
 
-  for i=0, wd-1 do
-    for j=0, hd-1 do
-      --i actually dont need to draw some of these
-      if backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 1 then
-        goto skip_split
-      end
+    --pixel coords pass
+    local ax_start = ax * gcw2
+    local ay_start = ay * gch2 
+    local aw_start = aw
 
-      local c = color_samples[1+j+i*hd]
-      
-      if c then
-        c.value = c.value * tri.c
+    local delta_ax = (bx-ax)/wd * gcw2
+    local delta_ay = (by-ay)/wd * gch2
+    local delta_aw = (bw-aw)/wd
 
-        -- 1 -- 2
-        -- |    |
-        -- 3 -- 4
+    local cx_start = cx * gcw2
+    local cy_start = cy * gch2
+    local cw_start = cw
 
-        local x1 = pixel_coord_x[1+j+i*(hd+1)]
-        local y1 = pixel_coord_y[1+j+i*(hd+1)]
+    local delta_cx = (dx-cx)/wd * gcw2
+    local delta_cy = (dy-cy)/wd * gch2
+    local delta_cw = (dw-cw)/wd
 
-        local x2 = pixel_coord_x[1+j+(i+1)*(hd+1)]
-        local y2 = pixel_coord_y[1+j+(i+1)*(hd+1)]
+    for i=0, wd do
+        local delta_bw = (cw_start-aw_start)/hd
+        local delta_bx = (cx_start-ax_start)/hd
+        local delta_by = (cy_start-ay_start)/hd
+        
+        local start_bw = aw_start
+        local start_bx = ax_start
+        local start_by = ay_start
 
-        local x3 = pixel_coord_x[2+j+i*(hd+1)]
-        local y3 = pixel_coord_y[2+j+i*(hd+1)]
+        for j=0, hd do
+            if backside_showing and i > 1 and i < wd -1 and j > 1 and j <hd-1 then
+                goto skip_coord
+            end
 
-        local x4 = pixel_coord_x[2+j+(i+1)*(hd+1)]
-        local y4 = pixel_coord_y[2+j+(i+1)*(hd+1)]
+            --only compute if any surrounding color exists
+            -- c1|c2
+            -- — O —
+            -- c3|c4
 
-        local newtri = {Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3),c,0}
+            if color_samples[1+j+i*hd] or color_samples[j+i*hd] or color_samples[1+j+(i-1)*hd] or color_samples[j+(i-1)*hd] then
+                local index = 1+j+i*(hd+1)
+                pixel_coord_x[index] = start_bx/start_bw + gcw2
+                pixel_coord_y[index] = start_by/start_bw + gch2
+            end
 
-        if naive_rectclip(gc.width,gc.height,newtri) then
-          local k = (2*i+1) / wd
-          newtri[6] = ((dz-cz-bz+az)*k-(az-cz)*2)*(2*j+1) / hd + ((bz-az)*k+az*2)*2 --average z
-          table.insert(buffer, newtri)
+            ::skip_coord::
+
+            start_bw = start_bw + delta_bw
+            start_bx = start_bx + delta_bx
+            start_by = start_by + delta_by
         end
-      end
 
-      :: skip_split ::
+        ax_start = ax_start + delta_ax
+        ay_start = ay_start + delta_ay
+        aw_start = aw_start + delta_aw
+
+        cx_start = cx_start + delta_cx
+        cy_start = cy_start + delta_cy
+        cw_start = cw_start + delta_cw
     end
-  end
+
+    -- faces
+    for i=0, wd-1 do
+        for j=0, hd-1 do
+            --i actually dont need to draw some of these
+            if backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 1 then
+                goto skip_split
+            end
+
+            local c = color_samples[1+j+i*hd]
+            
+            if c==nil then
+                goto skip_split
+            end
+
+            c.value = c.value * tri.c
+
+            local x1 = pixel_coord_x[1+j+i*(hd+1)]
+            local y1 = pixel_coord_y[1+j+i*(hd+1)]
+
+            local x2 = pixel_coord_x[1+j+(i+1)*(hd+1)]
+            local y2 = pixel_coord_y[1+j+(i+1)*(hd+1)]
+
+            local x3 = pixel_coord_x[2+j+i*(hd+1)]
+            local y3 = pixel_coord_y[2+j+i*(hd+1)]
+
+            local x4 = pixel_coord_x[2+j+(i+1)*(hd+1)]
+            local y4 = pixel_coord_y[2+j+(i+1)*(hd+1)]
+
+            local newtri = {Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3),c,0}
+
+            if not naive_rectclip(gc.width,gc.height,newtri) then
+                goto skip_split
+            end
+
+            local k = (2*i+1) / wd
+            newtri[6] = ((dz-cz-bz+az)*k-(az-cz)*2)*(2*j+1) / hd + ((bz-az)*k+az*2)*2 --average z
+            table.insert(buffer, newtri)
+
+            :: skip_split ::
+        end
+    end
 end
 
 local function drawQuad(gc, tri,AA) 
