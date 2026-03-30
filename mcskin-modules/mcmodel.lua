@@ -32,14 +32,6 @@ local function clip(plane_p, plane_n, in_tri)
   return (d0 >= 0 and d1 >= 0 and d2 >= 0 and d3 >= 0)
 end
 
-local function lerp(a,b,t)
-  return (b-a)*t + a
-end
-
-local function lerp4(a,b,c,d,t1,t2)
-  --return ((d-c-b+a)*t1 - a+c)*t2 + ((b-a)*t1 + a)
-  return lerp(lerp(a,b,t1),lerp(c,d,t1),t2)
-end
 local function naive_rectclip(w,h,t)
   for i=1, 4 do
     local p = t[i]
@@ -56,7 +48,7 @@ local pixel_coord_x = {}
 local pixel_coord_y = {}
 --biggest face is on the torso 12 * 8, TODO: scale relative to multiplier
 
---this is the most expensive function
+--this is the most expensive function since it runs for every pixel
 local function splitQuad(buffer,tri,texture, gc, backside_showing)
     local ax, ay, aw, az = tri.p[1].x, tri.p[1].y, tri.p[1].w , tri.p[1].z
     local bx, by, bw, bz = tri.p[2].x, tri.p[2].y, tri.p[2].w , tri.p[2].z

@@ -32,7 +32,7 @@
 local sort = {}
 
 --tunable size for insertion sort "bottom out"
-sort.max_chunk_size = 32
+sort.max_chunk_size = 8
 
 --insertion sort on a section of array
 function sort._insertion_sort_impl(array, first, last, less)
