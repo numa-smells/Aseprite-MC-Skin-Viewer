@@ -180,71 +180,82 @@ local function splitQuad(buffer,tri,texture, gc, backside_showing)
         cw_start = cw_start + delta_cw
     end
 
-    -- faces
+    --generate faces
+    local visited = {}
+    local faces = {}
+
     for i=0, wd-1 do
-        local j = 0
-        local c = nil
+        for j=0, hd-1 do
+            local index = 1+j+i*hd
+            if visited[index]==nil then
+                visited[index] = true
+                local c = color_samples[index]
+                local face_w, face_h = 1, 1
 
-        while j < hd do
-            --i actually dont need to draw some of these
-            if backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 1 then
-                goto skip_split
-            end
+                if c ~= nil then
+                    --vertical pass
+                    local index_below = 1+face_h+j+i*hd
+                    local next_col = color_samples[index_below]
 
-            c = color_samples[1+j+i*hd]
-            
-            if c~=nil then
+                    while visited[index_below]==nil and next_col and (j+face_h < hd) and (c.rgbaPixel == next_col.rgbaPixel) do
+                        face_h = face_h + 1
+                        visited[index_below] = true
+                        index_below = 1+face_h+j+i*hd
+                        next_col = color_samples[index_below]
+                    end
 
-                
+                    --next horizontal pass
+                    --check if we can grow in horizontally
+                    local can_grow = true
 
-                local x1 = pixel_coord_x[1+j+i*(hd+1)]
-                local y1 = pixel_coord_y[1+j+i*(hd+1)]
-                local z1 = pixel_coord_z[1+j+i*(hd+1)]
+                    while can_grow do
+                        if (i + face_w) < wd then
+                            can_grow = true
 
-                local x2 = pixel_coord_x[1+j+(i+1)*(hd+1)]
-                local y2 = pixel_coord_y[1+j+(i+1)*(hd+1)]
-                local z2 = pixel_coord_z[1+j+(i+1)*(hd+1)]
+                            for g=1,face_h do
+                                next_col = color_samples[g+j+(i+face_w)*hd]
+                                if next_col then
+                                    can_grow = can_grow and (next_col.rgbaPixel == c.rgbaPixel)
+                                else
+                                    can_grow = false
+                                end
+                            end
+                        else
+                            can_grow = false
+                        end
+                        
+                        --if yes, update the values
+                        if can_grow then
+                            for g=1,face_h do
+                                visited[g+j+(i+face_w)*hd] = true
+                            end
+                            face_w = face_w + 1
+                        end
+                    end
+                    
 
-                local x3 = pixel_coord_x[2+j+i*(hd+1)]
-                local y3 = pixel_coord_y[2+j+i*(hd+1)]
-                local z3 = pixel_coord_z[2+j+i*(hd+1)]
+                    local x1 = pixel_coord_x[1+j+i*(hd+1)]
+                    local y1 = pixel_coord_y[1+j+i*(hd+1)]
+                    local z1 = pixel_coord_z[1+j+i*(hd+1)]
 
-                local x4 = pixel_coord_x[2+j+(i+1)*(hd+1)]
-                local y4 = pixel_coord_y[2+j+(i+1)*(hd+1)]
-                local z4 = pixel_coord_z[2+j+(i+1)*(hd+1)]
+                    local x2 = pixel_coord_x[1+j+(i+face_w)*(hd+1)]
+                    local y2 = pixel_coord_y[1+j+(i+face_w)*(hd+1)]
+                    local z2 = pixel_coord_z[1+j+(i+face_w)*(hd+1)]
 
-                --greedy mesho vertically
-                local next_col = color_samples[2+j+i*hd]
+                    local x3 = pixel_coord_x[face_h+1+j+i*(hd+1)]
+                    local y3 = pixel_coord_y[face_h+1+j+i*(hd+1)]
+                    local z3 = pixel_coord_z[face_h+1+j+i*(hd+1)]
 
-                while next_col and (j < hd-2) and (c.rgbaPixel == next_col.rgbaPixel) and not (backside_showing and i > 0 and i < wd-1 and j > 0 and j < hd - 2) do    
-                    j = j + 1
-                    x3 = pixel_coord_x[2+j+i*(hd+1)]
-                    y3 = pixel_coord_y[2+j+i*(hd+1)]
-                    z3 = pixel_coord_z[2+j+i*(hd+1)]
-
-                    x4 = pixel_coord_x[2+j+(i+1)*(hd+1)]
-                    y4 = pixel_coord_y[2+j+(i+1)*(hd+1)]
-                    z4 = pixel_coord_z[2+j+(i+1)*(hd+1)]
-                    next_col = color_samples[2+j+i*hd]
+                    local x4 = pixel_coord_x[face_h+1+j+(i+face_w)*(hd+1)]
+                    local y4 = pixel_coord_y[face_h+1+j+(i+face_w)*(hd+1)]
+                    local z4 = pixel_coord_z[face_h+1+j+(i+face_w)*(hd+1)]
+                    
+                    c.value = c.value * tri.c
+                    local newtri = {c,0,Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3)}
+                    newtri[2] = (az+bz+cz+dz)/4+max(z1,z2,z3,z4)
+                    table.insert(buffer, newtri)
                 end
-
-                c.value = c.value * tri.c
-
-                local newtri = {c,0,Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3)}
-
-                -- if not naive_rectclip(gc.width,gc.height,newtri) then
-                --     goto skip_split
-                -- end
-
-                local k = (2*i+1) / wd
-                newtri[2] = max(z1,z2,z3,z4)
-                table.insert(buffer, newtri)
-
-                
             end
-
-            :: skip_split ::
-            j = j + 1
         end
     end
 end
