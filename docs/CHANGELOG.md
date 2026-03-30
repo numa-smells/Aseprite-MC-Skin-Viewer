@@ -92,6 +92,7 @@ _No changes._
 ## [v1.2.0-beta] - 2026
 ### Changed
 - Window size stays consistent when hiding tools.
+- Greedy-meshing has been implemented.
 ### Added
 - New Profiler to test rendering time.
 ### Removed
@@ -99,7 +100,7 @@ _No changes._
 - Removed Herobrine.
 ### Fix
 - Rendering is ~60% faster(?) from optimizations. (worst case ~20fps now ~30fps)
-
+- Reduced visual issues with polygon ordering though still not 100% right ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
 
 ### Known Issues
 - Pasting while mirror draw is on is broken.
