@@ -52,6 +52,7 @@ local model = MCModel.new(spriteScaleMultiplier)
 
 local showDebug = false
 local AA = true
+local showWireframe = false
 local tools_visible = true
 
 local camera = {
@@ -349,7 +350,7 @@ local function onpaint(ev)
 	--gc.color = gc.theme.color.editor_face
 	gc.color = dlg.data["bg_color"]
 	gc:fillRect(Rectangle(0,0,gc.width,gc.height))
-	model:draw(texture, camera, gc, dlg.data["light_dir"], AA)
+	model:draw(texture, camera, gc, dlg.data["light_dir"], AA,showWireframe)
 	gc:drawThemeRect("editor_selected", 0,0,gc.width, gc.height)
 	
 	local endTime = os.clock()
@@ -963,7 +964,7 @@ dlg:button{
 dlg:check{
 	id="toggle_fps",
 	text="Show FPS",
-	selected=false,
+	selected=showDebug,
 	onclick = function()
 		showDebug = not showDebug
 	end
@@ -976,6 +977,17 @@ dlg:check{
 	selected=AA,
 	onclick = function()
 		AA = not AA
+	end
+}
+
+dlg:newrow()
+
+dlg:check{
+	id="toggle_wireframe",
+	text="Show Wireframe",
+	selected=showWireframe,
+	onclick = function()
+		showWireframe = not showWireframe
 	end
 }
 

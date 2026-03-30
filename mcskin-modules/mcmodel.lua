@@ -32,17 +32,6 @@ local function clip(plane_p, plane_n, in_tri)
   return (d0 >= 0 and d1 >= 0 and d2 >= 0 and d3 >= 0)
 end
 
-local function naive_rectclip(w,h,t)
-  for i=1, 4 do
-    local p = t[i]
-    if p.x >=0 and p.x < w and p.y >= 0 and p.y < h then
-      return true
-    end
-  end
-
-  return false
-end
-
 local color_samples = {}
 local pixel_coord_x = {}
 local pixel_coord_y = {}
@@ -50,7 +39,7 @@ local pixel_coord_z = {}
 --biggest face is on the torso 12 * 8, TODO: scale relative to multiplier
 
 --this is the most expensive function since it runs for every pixel
-local function splitQuad(buffer,tri,texture, gc, backside_showing)
+local function splitQuad(buffer,tri,texture, gc, backside_showing, isJacket)
     local ax, ay, aw, az = tri.p[1].x, tri.p[1].y, tri.p[1].w , tri.p[1].z
     local bx, by, bw, bz = tri.p[2].x, tri.p[2].y, tri.p[2].w , tri.p[2].z
     local cx, cy, cw, cz = tri.p[3].x, tri.p[3].y, tri.p[3].w , tri.p[3].z
@@ -251,8 +240,15 @@ local function splitQuad(buffer,tri,texture, gc, backside_showing)
                     local z4 = pixel_coord_z[face_h+1+j+(i+face_w)*(hd+1)]
                     
                     c.value = c.value * tri.c
-                    local newtri = {c,0,Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3)}
-                    newtri[2] = (az+bz+cz+dz)/4+max(z1,z2,z3,z4)
+                    local newtri = {c,z1+z2+z3+z4,Vec2(x1,y1),Vec2(x2,y2),Vec2(x4,y4),Vec2(x3,y3)}
+                    --move jacket layers forward/back to fix overlap issues
+                    if backside_showing then
+                        newtri[2] = newtri[2] + .5
+                    elseif isJacket then
+                        newtri[2] = newtri[2] - .5
+                    end
+
+
                     table.insert(buffer, newtri)
                 end
             end
@@ -260,9 +256,7 @@ local function splitQuad(buffer,tri,texture, gc, backside_showing)
     end
 end
 
-local function drawQuad(gc, tri,AA) 
-  
-
+local function drawQuad(gc, tri,AA,wireframeMode) 
   gc.color = tri[1]
         
   gc:beginPath()
@@ -277,11 +271,17 @@ local function drawQuad(gc, tri,AA)
   
   if tri[1].alpha == 255 and AA then
     gc.antialias = true
-    gc:fill()
+    if not wireframeMode then
+        gc:fill()
+    end
     gc:stroke()
   else
     gc.antialias = false
-    gc:stroke()
+    if wireframeMode then
+        gc:stroke()
+    else
+        gc:fill()
+    end
   end
 end
 
@@ -516,7 +516,7 @@ function MCModel:reset_pose()
 end
 
 
-function MCModel:draw(texture, camera, gc, light_dir, AA)
+function MCModel:draw(texture, camera, gc, light_dir, AA,showWireframe)
     gc.strokeWidth = 1
     --initialize rotmatrices
     local matProj = Mat4x4.proj(30, gc.height / gc.width, 0.1, 1000)
@@ -578,7 +578,7 @@ function MCModel:draw(texture, camera, gc, light_dir, AA)
                         dp = -normal.y
                     end
                     
-                    local backside_showing = not cube.isBackfaceCulling and normal.z > 0
+                    local backside_showing = (not cube.isBackfaceCulling) and (normal.z > 0)
                     if backside_showing then
                         dp = math.abs(dp)
                     end
@@ -605,7 +605,7 @@ function MCModel:draw(texture, camera, gc, light_dir, AA)
                         projTri.p[4] = proj_pointBuffer[face[4]]
 
 
-                        splitQuad(faceBuffer,projTri, texture,gc, backside_showing)
+                        splitQuad(faceBuffer,projTri, texture,gc, backside_showing, not cube.isBackfaceCulling)
                     end
                 end
             end
@@ -616,11 +616,11 @@ function MCModel:draw(texture, camera, gc, light_dir, AA)
     table.stable_sort(faceBuffer,function(a,b) return a[2] > b[2] end)
     local n = #faceBuffer
     for i = 1, n do
-        drawQuad(gc, faceBuffer[i], AA) 
+        drawQuad(gc, faceBuffer[i], AA,showWireframe) 
     end
 end
 
-function MCModel:draw_profile(texture, camera, gc, light_dir, AA)
+function MCModel:draw_profile(texture, camera, gc, light_dir, AA,showWireframe)
     gc.strokeWidth = 1
     --initialize rotmatrices
     local matProj = Mat4x4.proj(30, gc.height / gc.width, 0.1, 1000)
@@ -683,7 +683,7 @@ function MCModel:draw_profile(texture, camera, gc, light_dir, AA)
                         dp = -normal.y
                     end
                     
-                    local backside_showing = not cube.isBackfaceCulling and normal.z > 0
+                    local backside_showing = (not cube.isBackfaceCulling) and (normal.z > 0)
                     if backside_showing then
                         dp = math.abs(dp)
                     end
@@ -710,7 +710,7 @@ function MCModel:draw_profile(texture, camera, gc, light_dir, AA)
                         projTri.p[4] = proj_pointBuffer[face[4]]
 
 
-                        splitQuad(faceBuffer,projTri, texture,gc, backside_showing)
+                        splitQuad(faceBuffer,projTri, texture,gc,backside_showing, not cube.isBackfaceCulling)
                     end
                 end
             end
@@ -724,7 +724,7 @@ function MCModel:draw_profile(texture, camera, gc, light_dir, AA)
     profileTimes[2] = os.clock()
     local n = #faceBuffer
     for i = 1, n do
-        drawQuad(gc, faceBuffer[i], AA) 
+        drawQuad(gc, faceBuffer[i], AA,showWireframe) 
     end
     profileTimes[3] = os.clock()
     return profileTimes
