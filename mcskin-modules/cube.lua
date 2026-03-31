@@ -18,44 +18,89 @@ function Cube:setUV(uvScaleMultiplier)
 	local ht = self.cubeSize.y
 	local dt = self.cubeSize.z
 	
-	self.uv = {
-		{ --FRONT
-			Tex2((u+dt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
-			Tex2((u+wt+dt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
-			Tex2((u+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
-			Tex2((u+wt+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
-		},
-		{ -- LEFT
-			Tex2((u+dt+wt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
-			Tex2((u+dt+dt+wt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
-			Tex2((u+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
-			Tex2((u+dt+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
-		},
-		{ --BACK
-			Tex2((u+dt+dt+wt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
-			Tex2((u+wt+dt+dt+wt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
-			Tex2((u+dt+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
-			Tex2((u+wt+dt+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
-		},
-		{ --RIGHT
-			Tex2(u*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
-			Tex2((u+dt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
-			Tex2(u*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
-			Tex2((u+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
-		},
-		{ --BOTTOM
-			Tex2((u+dt+wt)*uvScaleMultiplier, 	(v+1)*uvScaleMultiplier),
-			Tex2((u+dt+wt+wt)*uvScaleMultiplier,(v+1)*uvScaleMultiplier),
-			Tex2((u+dt+wt)*uvScaleMultiplier, 	(v+dt+1)*uvScaleMultiplier),
-			Tex2((u+wt+dt+wt)*uvScaleMultiplier,(v+dt+1)*uvScaleMultiplier)
-		},
-		{ --TOP
-			Tex2((u+wt+dt-1)*uvScaleMultiplier, (v+1)*uvScaleMultiplier),
-			Tex2((u+dt-1)*uvScaleMultiplier, 	(v+1)*uvScaleMultiplier),
-			Tex2((u+wt+dt-1)*uvScaleMultiplier, (v+dt+1)*uvScaleMultiplier),
-			Tex2((u+dt-1)*uvScaleMultiplier, 	(v+dt+1)*uvScaleMultiplier)
+	--yeah this is kinda long and dumb but it works ok !!
+
+	if self.isMirrored then
+		self.uv = {
+			{ --FRONT
+				Tex2((u+wt+dt-1)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt-1)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				
+				Tex2((u+wt+dt-1)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
+				Tex2((u+dt-1)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			},
+			{ -- LEFT
+				Tex2((u+dt-1)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u-1)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt-1)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
+				Tex2((u-1)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			},
+			{ --BACK
+				Tex2((u+wt+dt+dt+wt-1)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt+dt+wt-1)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+wt+dt+dt+wt-1)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
+				Tex2((u+dt+dt+wt-1)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			},
+			{ -- RIGHT
+				Tex2((u+dt+dt+wt-1)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt+wt-1)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt+dt+wt-1)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
+				Tex2((u+dt+wt-1)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			},
+			{ --BOTTOM
+				
+				Tex2((u+dt+wt+wt-1)*uvScaleMultiplier,(v+1)*uvScaleMultiplier),
+				Tex2((u+dt+wt-1)*uvScaleMultiplier, 	(v+1)*uvScaleMultiplier),
+				Tex2((u+wt+dt+wt-1)*uvScaleMultiplier,(v+dt+1)*uvScaleMultiplier),
+				Tex2((u+dt+wt-1)*uvScaleMultiplier, 	(v+dt+1)*uvScaleMultiplier),
+			},
+			{ --TOP
+				Tex2((u+dt)*uvScaleMultiplier, 	(v+1)*uvScaleMultiplier),
+				Tex2((u+wt+dt)*uvScaleMultiplier, (v+1)*uvScaleMultiplier),
+				Tex2((u+dt)*uvScaleMultiplier, 	(v+dt+1)*uvScaleMultiplier),
+				Tex2((u+wt+dt)*uvScaleMultiplier, (v+dt+1)*uvScaleMultiplier)
+			}
 		}
-	}
+	else
+		self.uv = {
+			{ --FRONT
+				Tex2((u+dt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+wt+dt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
+				Tex2((u+wt+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			},
+			{ -- LEFT
+				Tex2((u+dt+wt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt+dt+wt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
+				Tex2((u+dt+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			},
+			{ --BACK
+				Tex2((u+dt+dt+wt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+wt+dt+dt+wt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
+				Tex2((u+wt+dt+dt+wt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			},
+			{ --RIGHT
+				Tex2(u*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2((u+dt)*uvScaleMultiplier, (v+ht+dt)*uvScaleMultiplier),
+				Tex2(u*uvScaleMultiplier, (v+dt)*uvScaleMultiplier),
+				Tex2((u+dt)*uvScaleMultiplier, (v+dt)*uvScaleMultiplier)
+			},
+			{ --BOTTOM
+				Tex2((u+dt+wt)*uvScaleMultiplier, 	(v+1)*uvScaleMultiplier),
+				Tex2((u+dt+wt+wt)*uvScaleMultiplier,(v+1)*uvScaleMultiplier),
+				Tex2((u+dt+wt)*uvScaleMultiplier, 	(v+dt+1)*uvScaleMultiplier),
+				Tex2((u+wt+dt+wt)*uvScaleMultiplier,(v+dt+1)*uvScaleMultiplier)
+			},
+			{ --TOP
+				Tex2((u+wt+dt-1)*uvScaleMultiplier, (v+1)*uvScaleMultiplier),
+				Tex2((u+dt-1)*uvScaleMultiplier, 	(v+1)*uvScaleMultiplier),
+				Tex2((u+wt+dt-1)*uvScaleMultiplier, (v+dt+1)*uvScaleMultiplier),
+				Tex2((u+dt-1)*uvScaleMultiplier, 	(v+dt+1)*uvScaleMultiplier)
+			}
+		}
+	end
 	return self
 end
 
@@ -66,6 +111,10 @@ function Cube.new(params)
 	inst.isVisible = true
 	if params.isVisible ~= nil then
 		inst.isVisible = params.isVisible
+	end
+
+	if params.isMirrored ~= nil then
+		inst.isMirrored = params.isMirrored
 	end
 
 	inst.isBackfaceCulling = true

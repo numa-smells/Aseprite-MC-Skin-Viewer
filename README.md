@@ -37,7 +37,7 @@ The extension may ask permission to read `mirrormap.png` and `mirrormap_slim.png
 - `Align View:` Snap the camera to view the model the given options.
 
 ### Model
-- `Model Type:` Select whether the skin type read as Classic (4px arms), Slim (3px arms), or Auto.
+- `Model Type:` Select whether the skin type read as Classic (4px arms), Slim (3px arms), Pre-1.8, or Auto.
 
 - `Toggle Overlay Layers:` Toggle visibility on the skin's 2nd layer.
 

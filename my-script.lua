@@ -26,7 +26,7 @@ function init(plugin)
             return false
         end
 
-        if not (app.sprite.width%64 == 0 and app.sprite.height%64 == 0 and app.sprite.width == app.sprite.height) then
+        if not (app.sprite.width%64 == 0 and app.sprite.height%32 == 0 and (app.sprite.width == app.sprite.height or app.sprite.width/app.sprite.height==2)) then
             return false
         end
 
@@ -48,7 +48,7 @@ function init(plugin)
             return false
         end
 
-        if not (app.sprite.width%64 == 0 and app.sprite.height%64 == 0 and app.sprite.width == app.sprite.height) then
+        if not (app.sprite.width%64 == 0 and app.sprite.height%32 == 0 and (app.sprite.width == app.sprite.height or app.sprite.width/app.sprite.height==2)) then
             return false
         end
 

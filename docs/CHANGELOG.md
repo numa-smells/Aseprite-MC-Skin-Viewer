@@ -92,17 +92,35 @@ _No changes._
 ## [v1.2.0-beta] - 2026
 ### Changed
 - Window size stays consistent when hiding tools.
-- Greedy-meshing has been implemented.
 ### Added
 - New Profiler to test rendering time.
+- Toggle to see wireframe.
+- Pre-1.8 models are now supported. ([#10](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/10))
 ### Removed
 - `lib3D.lua` is now depricated.
 - Removed Herobrine.
 ### Fix
-- Rendering is ~60% faster(?) from optimizations. (worst case ~20fps now ~30fps)
-- Reduced visual issues with polygon ordering though still not 100% right ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
+- Improved rendering times by using Greedy-Meshing and other optimization techniques.
+- Reduced visual issues with polygon ordering by pushing Z value of jacket layers... though still not 100% right. ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
+- Pose will no longer reset when model changes.
+- Pose no longer overrides visibility settings.
 
 ### Known Issues
-- Pasting while mirror draw is on is broken.
+- Mirror Tool Issues
+  - Pasting while mirror draw is on is broken.
+  - Does not work with HD Skins
 - Model continues to rotate after resizing dialog in multiple window mode. ([Issue on Aseprite's side, waiting for fix](https://github.com/aseprite/aseprite/issues/5449))
-- Visual issues due to wrong polygon ordering. ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
+- Visual issues due to polygon sorting problems. ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
+
+### To-Do / Plans
+- Further refactor model handler to be more dynamic and user-friendly.
+  - The goal is to have the UI adapt based on available models.
+  - Users would then be free to edit or add models more easily.
+    - Probably into a folder that can then be read on run-time.
+
+- Mirror maps should just be generated dynamically so we can also support larger model sizes.
+- Animations should also have a seperate handler that interacts with the UI and Model Handler.
+
+- The idea is to seperate data from the logic so in the future we can handle custom models and animations.
+
+- Probably also need to load/unload models to keep usage down. Refactor for memory safety.

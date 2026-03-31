@@ -16,17 +16,19 @@ if not app.sprite then
 end
 
 local spriteScaleMultiplier = 1
-if not (app.sprite.width%64 == 0 and app.sprite.height%64 == 0 and app.sprite.width == app.sprite.height) then -- checks if this sprite is a multiple of 64 (i.e. 128, 256, etc etc)
-	app.alert("The sprite canvas must be a multiple of 64 x 64")
+if not (app.sprite.width%64 == 0 and app.sprite.height%32 == 0 and (app.sprite.width == app.sprite.height or app.sprite.width/app.sprite.height==2)) then -- checks if this sprite is a multiple of 64 (i.e. 128, 256, etc etc)
+	app.alert("The sprite canvas must be a multiple of 64 x 64 or 64 x 32")
 	return
 else
 	spriteScaleMultiplier = app.sprite.width/64 -- if it's 64 x 64, scale multiplier will be 1. higher, it'll be 2, 3, etc
 end
 
-dofile("mcskin-modules"..app.fs.pathSeparator.."mcmodel.lua")
+local TARGET_FPS = 30
+--load model handler
+dofile("mcskin-modules"..app.fs.pathSeparator.."modelhandler.lua")
+local modelHandler = MCModelHandler.new()
+modelHandler:setScale(spriteScaleMultiplier)
 
-local model = MCModel.new(spriteScaleMultiplier)
---print(model)
 
 local showDebug = false
 local AA = true
@@ -42,7 +44,7 @@ local texture = Image(64*spriteScaleMultiplier, 64*spriteScaleMultiplier, curr_s
 
 texture:drawSprite(curr_sprite, app.frame.frameNumber)
 
-model:auto_model(texture)
+modelHandler:auto_model(texture)
 
 local function getLocalFilename(sprite)
 	local short_filename = ""
@@ -88,7 +90,7 @@ local function onpaint(ev)
 
 
     local startTime = os.clock()
-	local profile_times = model:draw_profile(texture, camera, gc, "Top", AA)
+	local profile_times = modelHandler.current:draw_profile(texture, camera, gc, "Top", AA)
 
 	gc.color = gc.theme.color.text
 
@@ -109,6 +111,19 @@ local function onpaint(ev)
 
     gc.strokeWidth = 2
     
+    gc.color = gc.theme.color.text
+    gc:fillText("Total:  "..string.sub(tostring(profile_times_total[4]), 1,5), 8, 48)
+
+    gc:beginPath()
+    gc:moveTo(0,320-(1/TARGET_FPS)*2000)
+    gc:lineTo(320,320-(1/TARGET_FPS)*2000)
+    gc:stroke()
+
+    gc:moveTo(0,320-(1/TARGET_FPS/2)*2000)
+    gc:lineTo(320,320-(1/TARGET_FPS/2)*2000)
+    gc:stroke()
+
+
     gc.color = Color{r=255,g=0,b=0,a=128}
 
     gc:fillText("Project: "..string.sub(tostring(profile_times_total[1]), 1,5), 8, 0)
@@ -139,8 +154,7 @@ local function onpaint(ev)
     end
     gc:stroke()
 
-    gc.color = gc.theme.color.text
-    gc:fillText("Total:  "..string.sub(tostring(profile_times_total[4]), 1,5), 8, 48)
+    
 end
 
 local pi = math.pi
@@ -149,10 +163,8 @@ local step = 2*math.pi/10
 local timer = Timer{
     interval = 1.0/30,
     ontick = function()
-        for key, part in pairs(model) do
-            if type(part) == "table" then
-                part.rot = Vec3(rnd(),rnd(),rnd())
-            end
+        for key, part in pairs(modelHandler.current) do
+            part.rot = Vec3(rnd(),rnd(),rnd())
         end
 
         if camera.rot.z <= pi*2 then
@@ -167,9 +179,7 @@ local timer = Timer{
     end
 }
 
-function test()
-
-
+local function test()
     profile_times_total = {0,0,0,0}
     times = {}
     camera.rot.z = 0
@@ -200,6 +210,6 @@ dlg:button{
     onclick = test
 }
 
-dlg:show{wait=false}
+dlg:show{}
 
 

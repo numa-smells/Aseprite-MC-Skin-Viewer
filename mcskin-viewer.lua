@@ -16,8 +16,8 @@ if not app.sprite then
 end
 
 local spriteScaleMultiplier = 1
-if not (app.sprite.width%64 == 0 and app.sprite.height%64 == 0 and app.sprite.width == app.sprite.height) then -- checks if this sprite is a multiple of 64 (i.e. 128, 256, etc etc)
-	app.alert("The sprite canvas must be a multiple of 64 x 64")
+if not (app.sprite.width%64 == 0 and app.sprite.height%32 == 0 and (app.sprite.width == app.sprite.height or app.sprite.width/app.sprite.height==2)) then -- checks if this sprite is a multiple of 64 (i.e. 128, 256, etc etc)
+	app.alert("The sprite canvas must be a multiple of 64 x 64 or 64 x 32")
 	return
 else
 	spriteScaleMultiplier = app.sprite.width/64 -- if it's 64 x 64, scale multiplier will be 1. higher, it'll be 2, 3, etc
@@ -45,10 +45,12 @@ end
 
 local TARGET_FPS = 30
 
-dofile("mcskin-modules"..app.fs.pathSeparator.."mcmodel.lua")
+--dofile("mcskin-modules"..app.fs.pathSeparator.."mcmodel.lua")
 
-local model = MCModel.new(spriteScaleMultiplier)
---print(model)
+-- local model = MCModel.new(spriteScaleMultiplier)
+dofile("mcskin-modules"..app.fs.pathSeparator.."modelhandler.lua")
+local modelHandler = MCModelHandler.new()
+modelHandler:setScale(spriteScaleMultiplier)
 
 local showDebug = false
 local AA = true
@@ -65,7 +67,7 @@ local texture = Image(64*spriteScaleMultiplier, 64*spriteScaleMultiplier, curr_s
 
 texture:drawSprite(curr_sprite, app.frame.frameNumber)
 
-model:auto_model(texture)
+modelHandler:auto_model(texture)
 
 local function getLocalFilename(sprite)
 	local short_filename = ""
@@ -80,6 +82,7 @@ end
 local modulePath = PluginPath..app.fs.pathSeparator.."mcskin-modules"..app.fs.pathSeparator
 local mirror_map = Image{fromFile = modulePath ..app.fs.pathSeparator.. "mirrormap.png"}
 local mirror_map_slim = Image{fromFile = modulePath ..app.fs.pathSeparator.. "mirrormap_slim.png"}
+local mirror_map_old = Image{fromFile = modulePath ..app.fs.pathSeparator.. "mirrormap_old.png"}
 
 local dlg
 local sin, cos = math.sin, math.cos
@@ -89,122 +92,95 @@ local texture_changed = function() end
 local on_filenamechange = function() end
 
 local fElapsedTime = 0.0
+
+local function updatePose(model, pose, fElapsedTime)
+	if pose == "Stand" then
+		model["arm_r"].rot.x = sin(fElapsedTime) * 0.05 - 0.05
+		model["arm_l"].rot.x = -sin(fElapsedTime) * 0.05 + 0.05
+
+	elseif pose == "Walk" then
+		model["arm_r"].rot.z = sin(fElapsedTime) * 0.78
+		model["arm_l"].rot.z = -sin(fElapsedTime) * 0.78
+
+		model["leg_r"].rot.z = -sin(fElapsedTime) * 0.78
+		model["leg_l"].rot.z = sin(fElapsedTime) * 0.7
+	elseif pose == "Sit" then
+		model["arm_r"].rot.z = 0.62
+		model["arm_l"].rot.z = 0.62
+
+		model["arm_r"].rot.x = sin(fElapsedTime) * 0.05 - 0.05
+		model["arm_l"].rot.x = -sin(fElapsedTime) * 0.05 + 0.05
+
+		model["leg_r"].rot.z = 1.26
+		model["leg_l"].rot.z = 1.26
+
+		model["leg_r"].rot.x = -0.32
+		model["leg_l"].rot.x = 0.32
+
+		model["head"].rot.z = 0.09
+	elseif pose == "Sneak" then
+		model["body"].rot.z = -0.49
+		model["head"].rot.z = -0.09
+
+		model["head"].pos.y = -.5
+		model["body"].pos.y = -.5
+
+		model["arm_r"].rot.z = sin(fElapsedTime/2) * 0.78
+		model["arm_l"].rot.z = -sin(fElapsedTime/2) * 0.78
+
+		model["arm_r"].pos.y = -3/8
+		model["arm_l"].pos.y = -3/8
+
+		model["leg_r"].rot.z = -sin(fElapsedTime/2) * 0.78
+		model["leg_l"].rot.z = sin(fElapsedTime/2) * 0.7
+
+		model["leg_r"].pos.z = .5
+		model["leg_l"].pos.z = .5
+	elseif pose == "Explode" then
+		model["head"].pos.y = -10/8
+
+		model["leg_r"].pos.y = 10/8
+		model["leg_l"].pos.y = 10/8
+
+		model["leg_r"].pos.x = -4/8
+		model["leg_l"].pos.x = 4/8
+
+		model["arm_r"].pos.x = -9/8
+		model["arm_l"].pos.x = 9/8
+	elseif pose == "1st Person"	then
+		camera.pos = Vec3(0,0,1.5)
+		camera.rot = Vec3(0,3.14,0)
+		
+		model["arm_r"].pos.x = -9/8
+		model["arm_l"].pos.x = 9/8
+
+		model["arm_r"].rot.z = 3.14*3/4
+		model["arm_l"].rot.z = 3.14*3/4
+
+		model["arm_r"].rot.y = 3.14*1/4
+		model["arm_l"].rot.y = -3.14*1/4
+
+		model["arm_r"].pos.y = 1.8
+		model["arm_l"].pos.y = 1.8
+
+		model:part_visibility("head", false)
+		model:part_visibility("body", false)
+		model:part_visibility("leg_l", false)
+		model:part_visibility("leg_r", false)
+	end
+
+	repaint_force()
+end
+
 local timer = Timer{
 	interval=1.0/TARGET_FPS,
 	ontick=function()
 		fElapsedTime = fElapsedTime + 3 * 1.0/TARGET_FPS
 
 		local pose = dlg.data["pose"]
+		local model = modelHandler.current
 
-		if pose == "Stand" then
-			model["arm_r_slim"].rot.x = sin(fElapsedTime) * 0.05 - 0.05
-			model["arm_l_slim"].rot.x = -sin(fElapsedTime) * 0.05 + 0.05
-			model["arm_r"].rot.x = sin(fElapsedTime) * 0.05 - 0.05
-			model["arm_l"].rot.x = -sin(fElapsedTime) * 0.05 + 0.05
-
-		elseif pose == "Walk" then
-			model["arm_r_slim"].rot.z = sin(fElapsedTime) * 0.78
-			model["arm_l_slim"].rot.z = -sin(fElapsedTime) * 0.78
-			model["arm_r"].rot.z = sin(fElapsedTime) * 0.78
-			model["arm_l"].rot.z = -sin(fElapsedTime) * 0.78
-
-			model["leg_r"].rot.z = -sin(fElapsedTime) * 0.78
-			model["leg_l"].rot.z = sin(fElapsedTime) * 0.7
-		elseif pose == "Sit" then
-			model["arm_r_slim"].rot.z = 0.62
-			model["arm_l_slim"].rot.z = 0.62
-			model["arm_r"].rot.z = 0.62
-			model["arm_l"].rot.z = 0.62
-
-			model["arm_r_slim"].rot.x = sin(fElapsedTime) * 0.05 - 0.05
-			model["arm_l_slim"].rot.x = -sin(fElapsedTime) * 0.05 + 0.05
-			model["arm_r"].rot.x = sin(fElapsedTime) * 0.05 - 0.05
-			model["arm_l"].rot.x = -sin(fElapsedTime) * 0.05 + 0.05
-
-			model["leg_r"].rot.z = 1.26
-			model["leg_l"].rot.z = 1.26
-
-			model["leg_r"].rot.x = -0.32
-			model["leg_l"].rot.x = 0.32
-
-			model["head"].rot.z = 0.09
-		elseif pose == "Sneak" then
-			model["body"].rot.z = -0.49
-			model["head"].rot.z = -0.09
-
-			model["head"].pos.y = -.5
-			model["body"].pos.y = -.5
-
-			model["arm_r_slim"].rot.z = sin(fElapsedTime/2) * 0.78
-			model["arm_l_slim"].rot.z = -sin(fElapsedTime/2) * 0.78
-			model["arm_r"].rot.z = sin(fElapsedTime/2) * 0.78
-			model["arm_l"].rot.z = -sin(fElapsedTime/2) * 0.78
-
-			model["arm_r_slim"].pos.y = -3/8
-			model["arm_l_slim"].pos.y = -3/8
-			model["arm_r"].pos.y = -3/8
-			model["arm_l"].pos.y = -3/8
-
-			model["leg_r"].rot.z = -sin(fElapsedTime/2) * 0.78
-			model["leg_l"].rot.z = sin(fElapsedTime/2) * 0.7
-
-			model["leg_r"].pos.z = .5
-			model["leg_l"].pos.z = .5
-		elseif pose == "Explode" then
-			model["head"].pos.y = -10/8
-
-			model["leg_r"].pos.y = 10/8
-			model["leg_l"].pos.y = 10/8
-
-			model["leg_r"].pos.x = -4/8
-			model["leg_l"].pos.x = 4/8
-
-			model["arm_r_slim"].pos.x = -9/8
-			model["arm_l_slim"].pos.x = 9/8
-			model["arm_r"].pos.x = -9/8
-			model["arm_l"].pos.x = 9/8
-		elseif pose == "1st Person"	then
-			camera.pos = Vec3(0,0,1.5)
-			camera.rot = Vec3(0,3.14,0)
-			
-			model["arm_r_slim"].pos.x = -9/8
-			model["arm_l_slim"].pos.x = 9/8
-			model["arm_r"].pos.x = -9/8
-			model["arm_l"].pos.x = 9/8
-
-			model["arm_r"].rot.z = 3.14*3/4
-			model["arm_l"].rot.z = 3.14*3/4
-
-			model["arm_r"].rot.y = 3.14*1/4
-			model["arm_r_slim"].rot.y = 3.14*1/4
-
-			model["arm_l"].rot.y = -3.14*1/4
-			model["arm_l_slim"].rot.y = -3.14*1/4
-
-			model["arm_r"].pos.y = 1.8
-			model["arm_r_slim"].pos.y = 1.8
-
-			model["arm_l"].pos.y = 1.8
-			model["arm_l_slim"].pos.y = 1.8
-
-
-			model["arm_r_slim"].rot.z = 3.14*3/4
-			model["arm_l_slim"].rot.z = 3.14*3/4
-
-			model:cube_visibility("head", false)
-			model:cube_visibility("hat", false)
-
-			model:cube_visibility("body", false)
-			model:cube_visibility("jacket", false)
-
-			model:cube_visibility("leg_l", false)
-			model:cube_visibility("pants_l", false)
-
-			model:cube_visibility("leg_r", false)
-			model:cube_visibility("pants_r", false)
-		end
-
-		repaint_force()
+		updatePose(model, pose, fElapsedTime)
 	end }
 
 
@@ -261,7 +237,7 @@ local curr_layer = app.layer.stackIndex
 
 texture_changed = function(ev)
 	if app.sprite == curr_sprite then
-		if app.sprite.width%64 == 0 and app.sprite.height%64 == 0 then
+		if app.sprite.width%64 == 0 and app.sprite.height%32 == 0 then
 			--make sure we are still on the same cell
 			local last_frame = curr_frame
 			curr_frame = app.frame.frameNumber -- update current frame
@@ -274,11 +250,11 @@ texture_changed = function(ev)
 			
 			if app.sprite.width/64 ~= spriteScaleMultiplier then -- if sprite size changed
 				--app.alert("Canvas size changed. Please restart MCSkinViewer.") -- TODO: update UVs for all cubes
-				if app.sprite.width%64 == 0 and app.sprite.height%64 == 0 then
+				if (app.sprite.width%64 == 0 and app.sprite.height%32 == 0 and (app.sprite.width == app.sprite.height or app.sprite.width/app.sprite.height==2)) then
 					spriteScaleMultiplier = app.sprite.width/64
-					model:updateUV(spriteScaleMultiplier)
+					modelHandler:setScale(spriteScaleMultiplier)
 				else
-					app.alert("Error: Canvas changed to an invalid size")
+					app.alert("Error: Canvas changed to an invalid size. Canvas must be a multiple of 64x64 or 64x32.")
 				end
 			elseif dlg.data["toggle_mirror"] and app.cel then	
 
@@ -301,7 +277,9 @@ texture_changed = function(ev)
 							if a.rgbaPixel ~= b.rgbaPixel then
 								local c -- determines where the pixel gets mirrored to (via mirror map colors)
 								local curr_mirrorMap
-								if model.isSlim then
+								if modelHandler.current_key == "Pre-1.8" then
+									curr_mirrorMap = mirror_map_old	
+								elseif modelHandler.current_key == "Slim" then
 									curr_mirrorMap = mirror_map_slim
 								else
 									curr_mirrorMap = mirror_map
@@ -324,7 +302,7 @@ texture_changed = function(ev)
 			texture:drawSprite(curr_sprite, app.frame.frameNumber)
 
 			if dlg.data["model_type"] == "Auto" then
-				model:auto_model(texture)
+				modelHandler:auto_model(texture)
 			end
 		end
 	end
@@ -350,7 +328,7 @@ local function onpaint(ev)
 	--gc.color = gc.theme.color.editor_face
 	gc.color = dlg.data["bg_color"]
 	gc:fillRect(Rectangle(0,0,gc.width,gc.height))
-	model:draw(texture, camera, gc, dlg.data["light_dir"], AA,showWireframe)
+	modelHandler.current:draw(texture, camera, gc, dlg.data["light_dir"], AA,showWireframe)
 	gc:drawThemeRect("editor_selected", 0,0,gc.width, gc.height)
 	
 	local endTime = os.clock()
@@ -435,7 +413,7 @@ dlg:combobox{
 	options={"Stand", "Walk", "Sneak", "Sit", "Explode", "1st Person"},
 	onchange = function()
 		timer:start()
-		model:reset_pose()
+		modelHandler.current:reset_pose()
 	end
 }
 
@@ -448,7 +426,7 @@ dlg:button{
 			rot = Vec3()
 		}
 		fElapsedTime = 0
-		model:reset_pose()
+		modelHandler.current:reset_pose()
 		repaint()
 	end
 }
@@ -552,19 +530,19 @@ dlg:label{text="Model Type"}
 dlg:combobox{
 	id="model_type",
 	option="Auto",
-	options={"Auto", "Classic", "Slim"},
+	options = modelHandler:get_model_list(),
 	onchange = function(ev)
 		local result = dlg.data["model_type"]
 
-		if result == "Classic" then
-			model:classic_model()
-		elseif result == "Slim" then
-			model:slim_model()
-		else -- "Auto"
-			model:auto_model(texture)
+		if result == "Auto" then
+			modelHandler:auto_model(texture)
+		else
+			modelHandler:set_model(result)
 		end
-	repaint()
-	return
+
+		updatePose(modelHandler.current, dlg.data["pose"], fElapsedTime)
+
+		--repaint()
 	end
 }
 
@@ -572,7 +550,7 @@ dlg:combobox{
 -- this is insane, please rewrite to be more dynamic
 -- also !! should be able to toggle visibility for non-jacket too :>
 
-function update_toggle_overlay()
+local function update_toggle_overlay()
 	local overlay_toggles = {"toggle_hat", "toggle_jacket", "toggle_sleeve_r", "toggle_sleeve_l", "toggle_pants_r", "toggle_pants_l"}
 	local visible = false
 
@@ -600,12 +578,12 @@ dlg:check{
 		dlg:modify{id="toggle_pants_r", selected = res}
 		dlg:modify{id="toggle_pants_l", selected = res}
 
-		model:cube_visibility("hat", res)
-		model:cube_visibility("jacket", res)
-		model:cube_visibility("sleeve_r", res)
-		model:cube_visibility("sleeve_l", res)
-		model:cube_visibility("pants_r", res)
-		model:cube_visibility("pants_l", res)
+		modelHandler.current:cube_visibility("hat", res)
+		modelHandler.current:cube_visibility("jacket", res)
+		modelHandler.current:cube_visibility("sleeve_r", res)
+		modelHandler.current:cube_visibility("sleeve_l", res)
+		modelHandler.current:cube_visibility("pants_r", res)
+		modelHandler.current:cube_visibility("pants_l", res)
 
 		repaint()
 	end
@@ -619,7 +597,7 @@ dlg:check{
 	selected=true,
 	onclick = function()
 		local res = dlg.data["toggle_hat"]
-		model:cube_visibility("hat", res)
+		modelHandler.current:cube_visibility("hat", res)
 		update_toggle_overlay()
 		repaint()
 	end
@@ -633,7 +611,7 @@ dlg:check{
 	selected=true,
 	onclick = function()
 		local res = dlg.data["toggle_jacket"]
-		model:cube_visibility("jacket", res)
+		modelHandler.current:cube_visibility("jacket", res)
 		update_toggle_overlay()
 		repaint()
 	end
@@ -647,7 +625,7 @@ dlg:check{
 	selected=true,
 	onclick = function()
 		local res = dlg.data["toggle_sleeve_r"]
-		model:cube_visibility("sleeve_r", res)
+		modelHandler.current:cube_visibility("sleeve_r", res)
 		update_toggle_overlay()
 		repaint()
 	end
@@ -659,7 +637,7 @@ dlg:check{
 	selected=true,
 	onclick = function()
 		local res = dlg.data["toggle_sleeve_l"]
-		model:cube_visibility("sleeve_l", res)
+		modelHandler.current:cube_visibility("sleeve_l", res)
 		update_toggle_overlay()
 		repaint()
 	end
@@ -673,7 +651,7 @@ dlg:check{
 	selected=true,
 	onclick = function()
 		local res = dlg.data["toggle_pants_r"]
-		model:cube_visibility("pants_r", res)
+		modelHandler.current:cube_visibility("pants_r", res)
 		update_toggle_overlay()
 		repaint()
 	end
@@ -685,7 +663,7 @@ dlg:check{
 	selected=true,
 	onclick = function()
 		local res = dlg.data["toggle_pants_l"]
-		model:cube_visibility("pants_l", res)
+		modelHandler.current:cube_visibility("pants_l", res)
 		update_toggle_overlay()
 		repaint()
 	end
@@ -718,13 +696,13 @@ dlg:check{
 
 dlg:label{text="Copy From"}
 
-function removeFirst(tbl, val)
-	for i, v in ipairs(tbl) do
-		if v == val then
-			return table.remove(tbl, i)
-		end
-	end
-end
+-- local function removeFirst(tbl, val)
+-- 	for i, v in ipairs(tbl) do
+-- 		if v == val then
+-- 			return table.remove(tbl, i)
+-- 		end
+-- 	end
+-- end
 
 dlg:combobox{
 	id = "copy_from",
@@ -768,7 +746,7 @@ dlg:combobox{
 	end
 }
 
-function title_to_camel(s)
+local function title_to_camel(s)
 	return s:gsub("%s+", "_"):lower()
 end
 
@@ -782,8 +760,8 @@ dlg:button{
 			function()
 				
 
-				local cube_from = model:get_cube(title_to_camel(dlg.data["copy_from"]))
-				local cube_to = model:get_cube(title_to_camel(dlg.data["paste_to"]))
+				local cube_from = modelHandler.current:get_cube(title_to_camel(dlg.data["copy_from"]))
+				local cube_to = modelHandler.current:get_cube(title_to_camel(dlg.data["paste_to"]))
 				
 				curr_cell = Image(64*spriteScaleMultiplier, 64*spriteScaleMultiplier, app.cel.image.colorMode)
 				curr_cell:drawImage(app.cel.image, app.cel.position)
@@ -809,10 +787,10 @@ dlg:button{
 
 					local face_tex = Image(curr_cell, a_rect)
 
-					face_tex:resize{width = b_rect.width, height = b_rect.height}
-
-					curr_cell:drawImage(face_tex, Point(b_rect.x,b_rect.y))
-
+					if face_tex then
+						face_tex:resize{width = b_rect.width, height = b_rect.height}
+						curr_cell:drawImage(face_tex, Point(b_rect.x,b_rect.y))
+					end
 				end
 
 				app.cel.image = curr_cell:clone()
@@ -837,8 +815,8 @@ dlg:button{
 
 		app.transaction(
 			function()
-				local cube_from = model:get_cube(title_to_camel(dlg.data["copy_from"]))
-				local cube_to = model:get_cube(title_to_camel(dlg.data["paste_to"]))
+				local cube_from = modelHandler.current:get_cube(title_to_camel(dlg.data["copy_from"]))
+				local cube_to = modelHandler.current:get_cube(title_to_camel(dlg.data["paste_to"]))
 				
 				if not cube_to then
 					cube_to = cube_from
@@ -915,25 +893,23 @@ dlg:button{
 	id="export_preview",
 	text = "Export Preview",
 	onclick = function()
-		model:reset_pose()
+		modelHandler.current:reset_pose()
 		fElapsedTime = -math.pi/6
 
-		model["arm_r_slim"].rot.z = sin(fElapsedTime) * 0.78
-		model["arm_l_slim"].rot.z = -sin(fElapsedTime) * 0.78
-		model["arm_r"].rot.z = sin(fElapsedTime) * 0.78
-		model["arm_l"].rot.z = -sin(fElapsedTime) * 0.78
+		modelHandler.current["arm_r"].rot.z = sin(fElapsedTime) * 0.78
+		modelHandler.current["arm_l"].rot.z = -sin(fElapsedTime) * 0.78
 
-		model["leg_r"].rot.z = -sin(fElapsedTime) * 0.78
-		model["leg_l"].rot.z = sin(fElapsedTime) * 0.7
+		modelHandler.current["leg_r"].rot.z = -sin(fElapsedTime) * 0.78
+		modelHandler.current["leg_l"].rot.z = sin(fElapsedTime) * 0.7
 
 		local export_camera = {pos = Vec3(0,0,2.3), rot=Vec3(0,0.5,-0.2)}
 		local exportImage1 = Image(960,1080)
 
-		model:draw(texture, export_camera, exportImage1.context,dlg.data["light_dir"], true)
+		modelHandler.current:draw(texture, export_camera, exportImage1.context,dlg.data["light_dir"], true)
 
 		export_camera = {pos = Vec3(0,0,2.3), rot=Vec3(0,math.pi+0.5,-0.2)}
 		local exportImage2 = Image(960,1080)
-		model:draw(texture, export_camera, exportImage2.context,dlg.data["light_dir"], true)
+		modelHandler.current:draw(texture, export_camera, exportImage2.context,dlg.data["light_dir"], true)
 
 		local finalImage = Image(1920,1080)
 
