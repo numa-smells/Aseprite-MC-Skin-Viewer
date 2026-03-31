@@ -15,7 +15,7 @@ jobs:
       with:
         type: 'zip'
         filename: ${{format('mcskin-viewer{0}.aseprite-extension',  github.ref_name )}}
-        exclusions: '*.git* /*node_modules/* .editorconfig LICENSE README.md /*docs/* /*lib/* /*.vscode/*'
+        exclusions: '*.git* /*node_modules/* .editorconfig LICENSE README.md /*docs/* /*lib/* /*.vscode/* /*.depricated-scripts/*'
 
     - name: Create Release
       uses: ncipollo/release-action@v1.20.0

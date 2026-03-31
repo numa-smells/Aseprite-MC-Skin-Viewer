@@ -89,7 +89,7 @@ _No changes._
 - Greyscale and Indexed color modes are now supported. ([#2](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/2),[#7](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/7))
 - Crash upon opening with an empty frame. ([#5](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/5))
 
-## [v1.2.0-beta] - 2026
+## [v1.2.0-beta] - 2026-3-31
 ### Changed
 - Window size stays consistent when hiding tools.
 ### Added
@@ -107,8 +107,8 @@ _No changes._
 
 ### Known Issues
 - Mirror Tool Issues
-  - Pasting while mirror draw is on is broken.
-  - Does not work with HD Skins
+  - Pasting while mirror draw is on breaks.
+  - Does not work with HD Skins.
 - Model continues to rotate after resizing dialog in multiple window mode. ([Issue on Aseprite's side, waiting for fix](https://github.com/aseprite/aseprite/issues/5449))
 - Visual issues due to polygon sorting problems. ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
 

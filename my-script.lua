@@ -34,10 +34,16 @@ function init(plugin)
     end
   }
 
+  plugin:newMenuGroup{
+    id="mcskin_utils",
+    title="MC Skin Utilities",
+    group="view_screen"
+  }
+
   plugin:newCommand{
     id="MCSkinProfiler",
     title="MC Skin Profiler",
-    group="view_screen",
+    group="mcskin_utils",
     onclick=function()
       PluginPath = plugin.path
       VERSION = plugin.version
