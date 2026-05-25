@@ -1,10 +1,10 @@
-name: Release
+name: Beta Release
 on: 
   push:
     tags:
     - 'v*'
     branches:
-    - main
+    - beta
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,5 +31,5 @@ jobs:
         gameData: ${{format('mcskin-viewer{0}.aseprite-extension',  github.ref_name )}}
         itchUsername: numa-smells
         itchGameId: aseprite-mc-skin-viewer
-        buildChannel: main
+        buildChannel: beta
         buildNumber: ${{ github.ref_name }}
