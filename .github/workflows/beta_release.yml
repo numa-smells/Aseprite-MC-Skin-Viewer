@@ -21,6 +21,7 @@ jobs:
       uses: ncipollo/release-action@v1.20.0
       with:
         artifacts: ${{format('mcskin-viewer{0}.aseprite-extension',  github.ref_name )}}
+        prerelease: true
 
     - name: Itch.io - Publish
       uses: KikimoraGames/itch-publish@v0.0.3
