@@ -1,4 +1,6 @@
-dofile("mcmodel.lua")
+local Vec3 = dofile('vec3.lua')
+local Vec2 = dofile('vec2.lua')
+local MCModel = dofile("mcmodel.lua")
 
 --define all the models you want to use here.
 
@@ -8,13 +10,13 @@ local classic = MCModel.new()
         :Cube{
             id   = "head",  
             pos  = Vec3(0, -4, 0),
-            uv   = Tex2(0, 0), 
+            uv   = Vec2(0, 0), 
             size = Vec3(8, 8, 8)
         }
         :Cube{
             id   = "hat",  
             pos  = Vec3(0, -4, 0),
-            uv   = Tex2(32, 0), 
+            uv   = Vec2(32, 0), 
             size = Vec3(8, 8, 8),
             inflate = 0.5,
             isBackfaceCulling = false
@@ -24,15 +26,15 @@ local classic = MCModel.new()
         :Cube{
             id = "body",
             pos  = Vec3(0,6,0),
-            uv = Tex2(16, 16),
+            uv = Vec2(16, 16),
             size = Vec3(8,12,4)
         }
         :Cube{
             id   = "jacket",  
             pos  = Vec3(0, 6, 0),
-            uv   = Tex2(16, 32), 
+            uv   = Vec2(16, 32), 
             size = Vec3(8, 12, 4),
-            inflate = 0.25,
+            inflate = 0.251,
             isBackfaceCulling = false
         }
 
@@ -40,13 +42,13 @@ local classic = MCModel.new()
         :Cube{
             id = "arm_r",
             pos  = Vec3(-1, 4, 0),
-            uv = Tex2(40, 16),
+            uv = Vec2(40, 16),
             size = Vec3(4, 12, 4)
         }
         :Cube{
             id   = "sleeve_r", 
             pos  = Vec3(-1, 4, 0),
-            uv   = Tex2(40, 32), 
+            uv   = Vec2(40, 32), 
             size = Vec3(4, 12, 4),
             inflate = 0.25,
             isBackfaceCulling = false
@@ -56,13 +58,13 @@ local classic = MCModel.new()
         :Cube{
             id = "arm_l",
             pos  = Vec3(1, 4, 0),
-            uv = Tex2(32, 48),
+            uv = Vec2(32, 48),
             size = Vec3(4, 12, 4)
         }
         :Cube{
             id   = "sleeve_l", 
             pos  = Vec3(1, 4, 0),
-            uv   = Tex2(48, 48), 
+            uv   = Vec2(48, 48), 
             size = Vec3(4, 12, 4),
             inflate = 0.25,
             isBackfaceCulling = false
@@ -72,13 +74,13 @@ local classic = MCModel.new()
         :Cube{
             id = "leg_r",
             pos  = Vec3(0, 6, 0),
-            uv = Tex2(0, 16),
+            uv = Vec2(0, 16),
             size = Vec3(4, 12, 4)
         }
         :Cube{
             id   = "pants_r", 
             pos  = Vec3(0, 6, 0),
-            uv   = Tex2(0, 32), 
+            uv   = Vec2(0, 32), 
             size = Vec3(4, 12, 4),
             inflate = 0.25,
             isBackfaceCulling = false
@@ -88,13 +90,13 @@ local classic = MCModel.new()
         :Cube{
             id = "leg_l",
             pos  = Vec3(0, 6, 0),
-            uv = Tex2(16, 48),
+            uv = Vec2(16, 48),
             size = Vec3(4, 12, 4)
         }
         :Cube{
             id   = "pants_l", 
             pos  = Vec3(0, 6, 0),
-            uv   = Tex2(0, 48), 
+            uv   = Vec2(0, 48), 
             size = Vec3(4, 12, 4),
             inflate = 0.25,
             isBackfaceCulling = false
@@ -106,13 +108,13 @@ local slim = MCModel.new()
         :Cube{
             id   = "head",  
             pos  = Vec3(0, -4, 0),
-            uv   = Tex2(0, 0), 
+            uv   = Vec2(0, 0), 
             size = Vec3(8, 8, 8)
         }
         :Cube{
             id   = "hat",  
             pos  = Vec3(0, -4, 0),
-            uv   = Tex2(32, 0), 
+            uv   = Vec2(32, 0), 
             size = Vec3(8, 8, 8),
             inflate = 0.5,
             isBackfaceCulling = false
@@ -122,15 +124,15 @@ local slim = MCModel.new()
         :Cube{
             id = "body",
             pos  = Vec3(0,6,0),
-            uv = Tex2(16, 16),
+            uv = Vec2(16, 16),
             size = Vec3(8,12,4)
         }
         :Cube{
             id   = "jacket",  
             pos  = Vec3(0, 6, 0),
-            uv   = Tex2(16, 32), 
+            uv   = Vec2(16, 32), 
             size = Vec3(8, 12, 4),
-            inflate = 0.25,
+            inflate = 0.251,
             isBackfaceCulling = false
         }
 
@@ -138,13 +140,13 @@ local slim = MCModel.new()
         :Cube{
             id = "arm_r",
             pos  = Vec3(-.5, 4, 0),
-            uv = Tex2(40, 16),
+            uv = Vec2(40, 16),
             size = Vec3(3, 12, 4)
         }
         :Cube{
             id   = "sleeve_r", 
             pos  = Vec3(-.5, 4, 0),
-            uv   = Tex2(40, 32), 
+            uv   = Vec2(40, 32), 
             size = Vec3(3, 12, 4),
             inflate = 0.25,
             isBackfaceCulling = false
@@ -154,13 +156,13 @@ local slim = MCModel.new()
         :Cube{
             id = "arm_l",
             pos  = Vec3(.5, 4, 0),
-            uv = Tex2(32, 48),
+            uv = Vec2(32, 48),
             size = Vec3(3, 12, 4)
         }
         :Cube{
             id   = "sleeve_l", 
             pos  = Vec3(.5, 4, 0),
-            uv   = Tex2(48, 48), 
+            uv   = Vec2(48, 48), 
             size = Vec3(3, 12, 4),
             inflate = 0.25,
             isBackfaceCulling = false
@@ -170,13 +172,13 @@ local slim = MCModel.new()
         :Cube{
             id = "leg_r",
             pos  = Vec3(0, 6, 0),
-            uv = Tex2(0, 16),
+            uv = Vec2(0, 16),
             size = Vec3(4, 12, 4)
         }
         :Cube{
             id   = "pants_r", 
             pos  = Vec3(0, 6, 0),
-            uv   = Tex2(0, 32), 
+            uv   = Vec2(0, 32), 
             size = Vec3(4, 12, 4),
             inflate = 0.25,
             isBackfaceCulling = false
@@ -186,13 +188,13 @@ local slim = MCModel.new()
         :Cube{
             id = "leg_l",
             pos  = Vec3(0, 6, 0),
-            uv = Tex2(16, 48),
+            uv = Vec2(16, 48),
             size = Vec3(4, 12, 4)
         }
         :Cube{
             id   = "pants_l", 
             pos  = Vec3(0, 6, 0),
-            uv   = Tex2(0, 48), 
+            uv   = Vec2(0, 48), 
             size = Vec3(4, 12, 4),
             inflate = 0.25,
             isBackfaceCulling = false
@@ -204,13 +206,13 @@ local old = MCModel.new()
         :Cube{
             id   = "head",  
             pos  = Vec3(0, -4, 0),
-            uv   = Tex2(0, 0), 
+            uv   = Vec2(0, 0), 
             size = Vec3(8, 8, 8)
         }
         :Cube{
             id   = "hat",  
             pos  = Vec3(0, -4, 0),
-            uv   = Tex2(32, 0), 
+            uv   = Vec2(32, 0), 
             size = Vec3(8, 8, 8),
             inflate = 0.5,
             isBackfaceCulling = false
@@ -220,7 +222,7 @@ local old = MCModel.new()
         :Cube{
             id = "body",
             pos  = Vec3(0,6,0),
-            uv = Tex2(16, 16),
+            uv = Vec2(16, 16),
             size = Vec3(8,12,4)
         }
 
@@ -228,7 +230,7 @@ local old = MCModel.new()
         :Cube{
             id = "arm_r",
             pos  = Vec3(-1, 4, 0),
-            uv = Tex2(40, 16),
+            uv = Vec2(40, 16),
             size = Vec3(4, 12, 4)
         }
 
@@ -236,7 +238,7 @@ local old = MCModel.new()
         :Cube{
             id = "arm_l",
             pos  = Vec3(1, 4, 0),
-            uv = Tex2(40, 16),
+            uv = Vec2(40, 16),
             size = Vec3(4, 12, 4),
             isMirrored = true
         }
@@ -245,14 +247,14 @@ local old = MCModel.new()
         :Cube{
             id = "leg_r",
             pos  = Vec3(0, 6, 0),
-            uv = Tex2(0, 16),
+            uv = Vec2(0, 16),
             size = Vec3(4, 12, 4)
         }
     old["leg_l"] = Part{pos = Vec3(2, 6, 0)}
         :Cube{
             id = "leg_l",
             pos  = Vec3(0, 6, 0),
-            uv = Tex2(0, 16),
+            uv = Vec2(0, 16),
             size = Vec3(4, 12, 4),
             isMirrored = true
         }

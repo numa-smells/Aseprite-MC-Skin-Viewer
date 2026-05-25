@@ -89,7 +89,7 @@ _No changes._
 - Greyscale and Indexed color modes are now supported. ([#2](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/2),[#7](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/7))
 - Crash upon opening with an empty frame. ([#5](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/5))
 
-## [v1.2.0-beta] - 2026-3-31
+## [v1.2.0] - 2026-3-31
 ### Changed
 - Window size stays consistent when hiding tools.
 ### Added
@@ -104,6 +104,19 @@ _No changes._
 - Reduced visual issues with polygon ordering by pushing Z value of jacket layers... though still not 100% right. ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
 - Pose will no longer reset when model changes.
 - Pose no longer overrides visibility settings.
+
+## [v.2.0.0-beta] - 2025-5-25
+### Changed
+-  Overhauled rendering pipieline to be more accurate using BSPs. Not perfect but far better at handling intersections.
+- ...
+### Added
+- ...
+### Removed
+- Removed Herobrine.
+- ...
+### Fix
+- Fixed blurryness when UI is 200% mentioned in ([#3](https://github.com/numa-smells/Aseprite-MC-Skin-Viewer/issues/3))
+- ...
 
 ### Known Issues
 - Mirror Tool Issues

@@ -23,9 +23,9 @@ else
 	spriteScaleMultiplier = app.sprite.width/64 -- if it's 64 x 64, scale multiplier will be 1. higher, it'll be 2, 3, etc
 end
 
-local TARGET_FPS = 30
+local TARGET_FPS = 24
 --load model handler
-dofile("mcskin-modules"..app.fs.pathSeparator.."modelhandler.lua")
+local MCModelHandler = dofile("mcskin-modules"..app.fs.pathSeparator.."modelhandler.lua")
 local modelHandler = MCModelHandler.new()
 modelHandler:setScale(spriteScaleMultiplier)
 
@@ -44,8 +44,8 @@ local texture = Image(64*spriteScaleMultiplier, 64*spriteScaleMultiplier, curr_s
 
 texture:drawSprite(curr_sprite, app.frame.frameNumber)
 
-modelHandler:auto_model(texture)
-
+modelHandler:auto_model(texture) -- set model first
+modelHandler.current:updateTexture(texture) --then update texture
 local function getLocalFilename(sprite)
 	local short_filename = ""
 	for w in string.gmatch(sprite.filename, "([^"..app.fs.pathSeparator.."]+)") do
@@ -55,7 +55,7 @@ local function getLocalFilename(sprite)
 	return short_filename
 end
 
-TARGET_FPS = 30
+TARGET_FPS = 24
 local modulePath = PluginPath..app.fs.pathSeparator.."mcskin-modules"..app.fs.pathSeparator
 
 local dlg
@@ -66,20 +66,7 @@ local fElapsedTime = 0.0
 
 
 
-
-local curr_cell = Image(64*spriteScaleMultiplier, 64*spriteScaleMultiplier)
-local curr_mode
-if app.cel then
-	curr_cell:drawImage(app.cel.image, app.cel.position)
-	curr_mode = app.image.colorMode
-end
-local last_cell = curr_cell:clone()
-
-local curr_frame = app.frame.frameNumber
-local curr_layer = app.layer.stackIndex
-
-
-local profile_times_total = {0,0,0,0}
+local profile_times_total = {0, 0, 0, 0}
 local times = {}
 
 local function onpaint(ev)
@@ -90,69 +77,54 @@ local function onpaint(ev)
 
 
     local startTime = os.clock()
-	local profile_times = modelHandler.current:draw_profile(texture, camera, gc, "Top", AA)
 
-	gc.color = gc.theme.color.text
+    local depth, count, true_count = modelHandler.current:draw(camera, gc, "Top", AA)
 
-    --log times
-    times[#times + 1] = {} 
-    times[#times][1] = profile_times[1] - startTime
-    times[#times][2] = profile_times[2] - startTime
-    times[#times][3] = profile_times[3] - startTime
-
-    profile_times_total[1] = profile_times_total[1] + profile_times[1] - startTime
-
-    for i=2,3 do
-        profile_times_total[i] = profile_times_total[i] + profile_times[i] - profile_times[i-1]
-        
-    end
-
-    profile_times_total[4] = profile_times_total[4] + profile_times[3] - startTime
-
-    gc.strokeWidth = 2
+    local endTime = os.clock()
     
-    gc.color = gc.theme.color.text
-    gc:fillText("Total:  "..string.sub(tostring(profile_times_total[4]), 1,5), 8, 48)
+    local upper_bound =true_count +  2 * true_count * math.log(true_count,10)
+
+
+
+    profile_times_total[1] = profile_times_total[1] + endTime - startTime
+    profile_times_total[2] = profile_times_total[2] + depth
+    profile_times_total[3] = profile_times_total[3] + count 
+    profile_times_total[4] = profile_times_total[4] + upper_bound
+
+    times[#times+1] = endTime - startTime
+    
+    gc.strokeWidth = 2
+    gc.color = Color{gray=128}
 
     gc:beginPath()
     gc:moveTo(0,320-(1/TARGET_FPS)*2000)
     gc:lineTo(320,320-(1/TARGET_FPS)*2000)
     gc:stroke()
 
+    gc:beginPath()
     gc:moveTo(0,320-(1/TARGET_FPS/2)*2000)
     gc:lineTo(320,320-(1/TARGET_FPS/2)*2000)
     gc:stroke()
 
+    gc.color = Color{gray=255}
 
-    gc.color = Color{r=255,g=0,b=0,a=128}
-
-    gc:fillText("Project: "..string.sub(tostring(profile_times_total[1]), 1,5), 8, 0)
+    gc:fillText("Total: "..string.sub(tostring(#times/profile_times_total[1]), 1,5), 8, 0)
+    gc:fillText("Max-Depth: "..string.sub(tostring(profile_times_total[2]/#times), 1,5), 8, 24)
+    gc:fillText("#+Poly: "..string.sub(tostring(profile_times_total[3]/#times),1,5).." ("..string.sub(tostring(profile_times_total[3]/profile_times_total[4]*100),1,5).."%)", 8, 48)
     gc:beginPath()
-    gc:moveTo(0,320-times[1][1]*2000)
+    gc:moveTo(0,320-times[1]*2000)
     for i=2,#times do
-        gc:lineTo(320.0*i/#times,320-times[i][1]*2000)
+        gc:lineTo(320.0*i/#times,320-times[i]*2000)
     end
     gc:stroke()
 
-    gc.color = Color{r=0,g=255,b=0,a=128}
+    gc.color = Color{red=255,g=0,b=0,a=128}
 
-    gc:fillText("Sort:      "..string.sub(tostring(profile_times_total[2]), 1,5), 8, 16)
     gc:beginPath()
-    gc:moveTo(0,320-times[1][2]*2000)
-    for i=2,#times do
-        gc:lineTo(320.0*i/#times,320-times[i][2]*2000)
-    end
+    gc:moveTo(0,320-(profile_times_total[1]/#times)*2000)
+    gc:lineTo(320,320-(profile_times_total[1]/#times)*2000)
     gc:stroke()
 
-    gc.color = Color{r=0,g=0,b=255,a=128}
-
-    gc:fillText("Render: "..string.sub(tostring(profile_times_total[3]), 1,5), 8, 32)
-    gc:beginPath()
-    gc:moveTo(0,320-times[1][3]*2000)
-    for i=2,#times do
-        gc:lineTo(320.0*i/#times,320-times[i][3]*2000)
-    end
-    gc:stroke()
 
     
 end
@@ -161,7 +133,7 @@ local pi = math.pi
 local step = 2*math.pi/10
 
 local timer = Timer{
-    interval = 1.0/30,
+    interval = 1.0/TARGET_FPS,
     ontick = function()
         for key, part in pairs(modelHandler.current) do
             part.rot = Vec3(rnd(),rnd(),rnd())
@@ -180,7 +152,10 @@ local timer = Timer{
 }
 
 local function test()
-    profile_times_total = {0,0,0,0}
+    math.randomseed(411)
+    
+    
+    profile_times_total = {0, 0, 0, 0}
     times = {}
     camera.rot.z = 0
     camera.rot.y = 0

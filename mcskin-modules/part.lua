@@ -1,6 +1,6 @@
-dofile("vec3.lua")
-dofile("tex2.lua")
-dofile("cube.lua")
+local Vec2 = dofile("vec2.lua")
+local Vec3 = dofile("vec3.lua")
+local Cube = dofile("cube.lua")
 
 Part = {}
 Part.__index = Part
@@ -42,7 +42,7 @@ function Part:Cube(params)
 end
 
 function Part:__tostring()
-    return "test" --Part.toJson(self)
+    return Part.toJson(self)
 end
 
 function Part.toJson(p)

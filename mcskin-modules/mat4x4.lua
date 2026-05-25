@@ -90,7 +90,6 @@ function Mat4x4.proj(fFovDegrees, fAspectRatio, fNear, fFar)
 
   return res
 end
-
 function Mat4x4.matMul(m1,m2)
   local res = Mat4x4()
 
@@ -120,6 +119,7 @@ end
 function Mat4x4:__tostring()
     return Mat4x4.toJson(self)
 end
+
 
 function Mat4x4.toJson(m)
     return string.format(

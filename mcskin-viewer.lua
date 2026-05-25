@@ -43,16 +43,17 @@ for _, sprite in pairs(MCSkinViewers) do
 	end
 end
 
-local TARGET_FPS = 30
+local TARGET_FPS = 24
 
 --dofile("mcskin-modules"..app.fs.pathSeparator.."mcmodel.lua")
 
 -- local model = MCModel.new(spriteScaleMultiplier)
-dofile("mcskin-modules"..app.fs.pathSeparator.."modelhandler.lua")
+local MCModelHandler = dofile("mcskin-modules"..app.fs.pathSeparator.."modelhandler.lua")
+
 local modelHandler = MCModelHandler.new()
 modelHandler:setScale(spriteScaleMultiplier)
 
-local showDebug = false
+local showDebug = true
 local AA = true
 local showWireframe = false
 local tools_visible = true
@@ -68,6 +69,7 @@ local texture = Image(64*spriteScaleMultiplier, 64*spriteScaleMultiplier, curr_s
 texture:drawSprite(curr_sprite, app.frame.frameNumber)
 
 modelHandler:auto_model(texture)
+modelHandler.current:updateTexture(texture)
 
 local function getLocalFilename(sprite)
 	local short_filename = ""
@@ -304,6 +306,8 @@ texture_changed = function(ev)
 			if dlg.data["model_type"] == "Auto" then
 				modelHandler:auto_model(texture)
 			end
+
+			modelHandler.current:updateTexture(texture)
 		end
 	end
 
@@ -319,6 +323,7 @@ curr_sprite.events:on('filenamechange', on_filenamechange)
 
 local slow_rate = 0
 
+
 local function onpaint(ev)
 
 	local startTime = os.clock()
@@ -328,8 +333,8 @@ local function onpaint(ev)
 	--gc.color = gc.theme.color.editor_face
 	gc.color = dlg.data["bg_color"]
 	gc:fillRect(Rectangle(0,0,gc.width,gc.height))
-	modelHandler.current:draw(texture, camera, gc, dlg.data["light_dir"], AA,showWireframe)
-	gc:drawThemeRect("editor_selected", 0,0,gc.width, gc.height)
+	modelHandler.current:draw(camera, gc, dlg.data["light_dir"], AA,showWireframe)
+	--gc:drawThemeRect("editor_selected", 0,0,gc.width, gc.height)
 	
 	local endTime = os.clock()
 	local executionTime = endTime - startTime
@@ -390,7 +395,7 @@ end
 
 dlg:canvas{
 	id = 'canvas',
-	autoscaling=true, 
+	autoscaling=false, 
 	width = 320,
 	height = 320,
 	focus = false,
