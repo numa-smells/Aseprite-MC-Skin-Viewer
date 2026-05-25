@@ -2,9 +2,7 @@ name: Beta Release
 on: 
   push:
     tags:
-    - 'v*'
-    branches:
-    - beta
+    - 'v*-beta'
 jobs:
   build:
     runs-on: ubuntu-latest
