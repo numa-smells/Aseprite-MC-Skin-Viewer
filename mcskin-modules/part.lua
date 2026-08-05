@@ -1,6 +1,12 @@
-local Vec2 = dofile("vec2.lua")
-local Vec3 = dofile("vec3.lua")
-local Cube = dofile("cube.lua")
+if not Vec2 then
+  local Vec2 = dofile("vec2.lua")
+end
+if not Vec3 then
+  local Vec3 = dofile("vec3.lua")
+end
+if not Cube then
+  local Cube = dofile("cube.lua")
+end
 
 Part = {}
 Part.__index = Part

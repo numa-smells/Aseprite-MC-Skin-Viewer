@@ -1,4 +1,7 @@
-local Vec2 = dofile("vec2.lua")
+if not Vec2 then
+  local Vec2 = dofile("vec2.lua")
+end
+
 Vec3 = {}
 Vec3.__index = Vec3
 local function max(a,b)

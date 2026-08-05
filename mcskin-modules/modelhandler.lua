@@ -1,6 +1,12 @@
-local Vec3 = dofile('vec3.lua')
-local Vec2 = dofile('vec2.lua')
-local MCModel = dofile("mcmodel.lua")
+if not Vec2 then
+  local Vec2 = dofile("vec2.lua")
+end
+if not Vec3 then
+  local Vec3 = dofile("vec3.lua")
+end
+if not MCModel then
+    local MCModel = dofile("mcmodel.lua")
+end
 
 --define all the models you want to use here.
 

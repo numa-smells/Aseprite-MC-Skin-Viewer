@@ -1,6 +1,12 @@
-local Vec3 = dofile("vec3.lua")
-local Vec2 = dofile("vec2.lua")
-local Mat3x3 = dofile("mat3x3.lua")
+if not Vec2 then
+  local Vec2 = dofile("vec2.lua")
+end
+if not Vec3 then
+  local Vec3 = dofile("vec3.lua")
+end
+if not Mat3x3 then
+    local Mat3x3 = dofile("mat3x3.lua")
+end
 
 Face = {}
 Face.__index = Face

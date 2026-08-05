@@ -545,8 +545,8 @@ dlg:combobox{
 			modelHandler:set_model(result)
 		end
 
+		modelHandler.current:updateTexture(texture)
 		updatePose(modelHandler.current, dlg.data["pose"], fElapsedTime)
-
 		--repaint()
 	end
 }
@@ -775,17 +775,17 @@ dlg:button{
 					local uv_a = cube_from.uv[i]
 					local uv_b = cube_to.uv[i]
 
-					local a_min_u = math.min(uv_a[1].u,uv_a[2].u,uv_a[3].u,uv_a[4].u)
-					local a_min_v = math.min(uv_a[1].v,uv_a[2].v,uv_a[3].v,uv_a[4].v)
+					local a_min_u = math.min(uv_a[1].x,uv_a[2].x,uv_a[3].x,uv_a[4].x)
+					local a_min_v = math.min(uv_a[1].y,uv_a[2].y,uv_a[3].y,uv_a[4].y)
 
-					local a_max_u = math.max(uv_a[1].u,uv_a[2].u,uv_a[3].u,uv_a[4].u)
-					local a_max_v = math.max(uv_a[1].v,uv_a[2].v,uv_a[3].v,uv_a[4].v)
+					local a_max_u = math.max(uv_a[1].x,uv_a[2].x,uv_a[3].x,uv_a[4].x)
+					local a_max_v = math.max(uv_a[1].y,uv_a[2].y,uv_a[3].y,uv_a[4].y)
 
-					local b_min_u = math.min(uv_b[1].u,uv_b[2].u,uv_b[3].u,uv_b[4].u)
-					local b_min_v = math.min(uv_b[1].v,uv_b[2].v,uv_b[3].v,uv_b[4].v)
+					local b_min_u = math.min(uv_b[1].x,uv_b[2].x,uv_b[3].x,uv_b[4].x)
+					local b_min_v = math.min(uv_b[1].y,uv_b[2].y,uv_b[3].y,uv_b[4].y)
 
-					local b_max_u = math.max(uv_b[1].u,uv_b[2].u,uv_b[3].u,uv_b[4].u)
-					local b_max_v = math.max(uv_b[1].v,uv_b[2].v,uv_b[3].v,uv_b[4].v)
+					local b_max_u = math.max(uv_b[1].x,uv_b[2].x,uv_b[3].x,uv_b[4].x)
+					local b_max_v = math.max(uv_b[1].y,uv_b[2].y,uv_b[3].y,uv_b[4].y)
 
 					local a_rect = Rectangle(a_min_u,a_min_v,a_max_u-a_min_u,a_max_v-a_min_v)
 					local b_rect = Rectangle(b_min_u,b_min_v,b_max_u-b_min_u,b_max_v-b_min_v)
@@ -839,17 +839,17 @@ dlg:button{
 					local uv_a = cube_from.uv[i]
 					local uv_b = cube_to.uv[flip_order[i]]
 
-					local a_min_u = math.min(uv_a[1].u,uv_a[2].u,uv_a[3].u,uv_a[4].u)
-					local a_min_v = math.min(uv_a[1].v,uv_a[2].v,uv_a[3].v,uv_a[4].v)
+					local a_min_u = math.min(uv_a[1].x,uv_a[2].x,uv_a[3].x,uv_a[4].x)
+					local a_min_v = math.min(uv_a[1].y,uv_a[2].y,uv_a[3].y,uv_a[4].y)
 
-					local a_max_u = math.max(uv_a[1].u,uv_a[2].u,uv_a[3].u,uv_a[4].u)
-					local a_max_v = math.max(uv_a[1].v,uv_a[2].v,uv_a[3].v,uv_a[4].v)
+					local a_max_u = math.max(uv_a[1].x,uv_a[2].x,uv_a[3].x,uv_a[4].x)
+					local a_max_v = math.max(uv_a[1].y,uv_a[2].y,uv_a[3].y,uv_a[4].y)
 
-					local b_min_u = math.min(uv_b[1].u,uv_b[2].u,uv_b[3].u,uv_b[4].u)
-					local b_min_v = math.min(uv_b[1].v,uv_b[2].v,uv_b[3].v,uv_b[4].v)
+					local b_min_u = math.min(uv_b[1].x,uv_b[2].x,uv_b[3].x,uv_b[4].x)
+					local b_min_v = math.min(uv_b[1].y,uv_b[2].y,uv_b[3].y,uv_b[4].y)
 
-					local b_max_u = math.max(uv_b[1].u,uv_b[2].u,uv_b[3].u,uv_b[4].u)
-					local b_max_v = math.max(uv_b[1].v,uv_b[2].v,uv_b[3].v,uv_b[4].v)
+					local b_max_u = math.max(uv_b[1].x,uv_b[2].x,uv_b[3].x,uv_b[4].x)
+					local b_max_v = math.max(uv_b[1].y,uv_b[2].y,uv_b[3].y,uv_b[4].y)
 
 					local a_rect = Rectangle(a_min_u,a_min_v,a_max_u-a_min_u,a_max_v-a_min_v)
 					local b_rect = Rectangle(b_min_u,b_min_v,b_max_u-b_min_u,b_max_v-b_min_v)

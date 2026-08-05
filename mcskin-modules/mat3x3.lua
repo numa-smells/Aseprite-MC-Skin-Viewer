@@ -1,4 +1,6 @@
-local Vec2 = dofile('vec2.lua')
+if not Vec2 then
+  local Vec2 = dofile('vec2.lua')
+end
 
 Mat3x3 = {}
 Mat3x3.__index = Mat3x3

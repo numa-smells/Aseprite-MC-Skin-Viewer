@@ -5,11 +5,21 @@ end
 
 local randomseed, random, tan, exp = math.randomseed, math.random, math.tan, math.exp
 
-local Face = dofile("face.lua")
-local Vec3 = dofile("vec3.lua")
-local Vec2 = dofile("vec2.lua")
-local Part = dofile("part.lua")
-local Mat4x4 = dofile("mat4x4.lua")
+if not Vec2 then
+  local Vec2 = dofile("vec2.lua")
+end
+if not Vec3 then
+  local Vec3 = dofile("vec3.lua")
+end
+if not Face then
+  local Face = dofile("face.lua")
+end
+if not Part then
+  local Part = dofile("part.lua")
+end
+if not Mat4x4 then
+  local Mat4x4 = dofile("mat4x4.lua")
+end
 
 MCModel = {}
 MCModel.__index = MCModel
