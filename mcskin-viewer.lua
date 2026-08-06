@@ -910,11 +910,11 @@ dlg:button{
 		local export_camera = {pos = Vec3(0,0,2.3), rot=Vec3(0,0.5,-0.2)}
 		local exportImage1 = Image(960,1080)
 
-		modelHandler.current:draw(texture, export_camera, exportImage1.context,dlg.data["light_dir"], true)
+		modelHandler.current:draw(export_camera, exportImage1.context,dlg.data["light_dir"], true)
 
 		export_camera = {pos = Vec3(0,0,2.3), rot=Vec3(0,math.pi+0.5,-0.2)}
 		local exportImage2 = Image(960,1080)
-		modelHandler.current:draw(texture, export_camera, exportImage2.context,dlg.data["light_dir"], true)
+		modelHandler.current:draw(export_camera, exportImage2.context,dlg.data["light_dir"], true)
 
 		local finalImage = Image(1920,1080)
 
