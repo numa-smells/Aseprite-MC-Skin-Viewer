@@ -302,10 +302,12 @@ texture_changed = function(ev)
 
 			if dlg.data["model_type"] == "Auto" then
 				modelHandler:auto_model(texture)
-				updatePose(modelHandler.current, dlg.data["pose"], fElapsedTime)
+				modelHandler.current:reset_pose()
 			end
 
 			modelHandler.current:updateTexture(texture)
+			updatePose(modelHandler.current, dlg.data["pose"], fElapsedTime)
+			
 		end
 	end
 
