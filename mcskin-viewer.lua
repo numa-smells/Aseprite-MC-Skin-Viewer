@@ -36,7 +36,7 @@ if(MCSkinViewers == nil) then
 	MCSkinViewers = {}
 end
 
---check if this already exists
+--check if this already exists to stop opening multiple windows.
 for _, sprite in pairs(MCSkinViewers) do
 	if sprite == app.sprite then
 		return
@@ -53,10 +53,10 @@ local MCModelHandler = dofile("mcskin-modules"..app.fs.pathSeparator.."modelhand
 local modelHandler = MCModelHandler.new()
 modelHandler:setScale(spriteScaleMultiplier)
 
-local showDebug = true
-local AA = true
+local showDebug = false
+local AA = false
 local showWireframe = false
-local tools_visible = true
+local tools_visible = false
 
 local camera = {
 	pos = Vec3(0,0,2.3),
@@ -179,10 +179,7 @@ local timer = Timer{
 	ontick=function()
 		fElapsedTime = fElapsedTime + 3 * 1.0/TARGET_FPS
 
-		local pose = dlg.data["pose"]
-		local model = modelHandler.current
-
-		updatePose(model, pose, fElapsedTime)
+		updatePose(modelHandler.current, dlg.data["pose"], fElapsedTime)
 	end }
 
 
@@ -305,6 +302,7 @@ texture_changed = function(ev)
 
 			if dlg.data["model_type"] == "Auto" then
 				modelHandler:auto_model(texture)
+				updatePose(modelHandler.current, dlg.data["pose"], fElapsedTime)
 			end
 
 			modelHandler.current:updateTexture(texture)
@@ -337,6 +335,63 @@ local function onpaint(ev)
 	--gc:drawThemeRect("editor_selected", 0,0,gc.width, gc.height)
 	
 	local endTime = os.clock()
+
+	gc.strokeWidth = 2
+
+
+	--draw buttons
+	gc.color = Color{gray=255, alpha=64}
+	gc:beginPath()
+	gc:oval(Rectangle(4,4,40,40))
+	gc:fill()
+
+	
+	local rotMat = Mat4x4.rot(camera.rot.x,camera.rot.y,camera.rot.z)
+
+	local front = Vec3(0,0,-1):applyMat4x4(rotMat)
+	local back = Vec3(0,0,1):applyMat4x4(rotMat)
+
+	gc.color = Color{red=255, alpha=128}
+	gc:beginPath()
+	gc:oval(Rectangle(20+front.x*16,20+front.y*16,8,8))
+	gc:fill()
+
+	gc:beginPath()
+	gc:oval(Rectangle(20+back.x*16,20+back.y*16,8,8))
+	gc:moveTo(24+front.x*16, 24+front.y*16)
+	gc:lineTo(24,24)
+	gc:stroke()
+
+	local left = Vec3(0,-1,0):applyMat4x4(rotMat)
+	local right = Vec3(0,1,0):applyMat4x4(rotMat)
+
+	gc.color = Color{red=0, blue=255, alpha=128}
+	gc:beginPath()
+	gc:oval(Rectangle(20+left.x*16,20+left.y*16,8,8))
+	gc:fill()
+
+	gc:beginPath()
+	gc:oval(Rectangle(20+right.x*16,20+right.y*16,8,8))
+	gc:moveTo(24+left.x*16, 24+left.y*16)
+	gc:lineTo(24,24)
+
+	gc:stroke()
+
+	local up = Vec3(1,0,0):applyMat4x4(rotMat)
+	local down = Vec3(-1,0,0):applyMat4x4(rotMat)
+
+	gc.color = Color{red=0, blue=0, green=255, alpha=128}
+	gc:beginPath()
+	gc:oval(Rectangle(20+up.x*16,20+up.y*16,8,8))
+	gc:fill()
+	
+	gc:beginPath()
+	gc:oval(Rectangle(20+down.x*16,20+down.y*16,8,8))
+	gc:moveTo(24+up.x*16, 24+up.y*16)
+	gc:lineTo(24,24)
+	gc:stroke()
+
+
 	local executionTime = endTime - startTime
 	
 	if (1/executionTime) < TARGET_FPS then
@@ -998,6 +1053,8 @@ dlg:button{
 	end
 }
 
+
+
 dlg:separator{id="ver", text="MC-Skin Viewer v".. tostring(VERSION) .." by @numa-smells"}
 
 dlg:show{wait=false}
@@ -1005,3 +1062,15 @@ timer:start()
 
 --cw_offset = dlg.bounds.width - 360 
 ch_offset = dlg.bounds.height - 360
+
+
+local bounds = dlg.bounds
+dlg:modify{id="end_tab", visible = tools_visible}
+
+if tools_visible then
+	dlg:modify{id="hide", text = "▼"}
+else
+	dlg:modify{id="hide", text = "▲"}
+end
+
+dlg.bounds = bounds
