@@ -5,6 +5,7 @@
   "Lua.diagnostics.disable": [
     "unused-local",
     "redundant-parameter",
-    "need-check-nil"
+    "need-check-nil",
+    "param-type-mismatch"
   ]
 }

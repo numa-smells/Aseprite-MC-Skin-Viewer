@@ -133,6 +133,7 @@ _No changes._
 
 - Mirror maps should just be generated dynamically so we can also support larger model sizes.
 - Animations should also have a seperate handler that interacts with the UI and Model Handler.
+- Seperate renderer to its own module so we can have different renderers.
 
 - The idea is to seperate data from the logic so in the future we can handle custom models and animations.
 
